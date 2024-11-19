@@ -85,10 +85,10 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	defer dao.CloseDB(mydao)
 
 	// 判断是用户名密码登录还是手机号验证码登录
-	if req.Phone != "" && req.Code != "" {
+	if login_info.Phone != "" && login_info.Code != "" {
 		// 先验证验证码是否正确（这里只是简单对比示例，实际可能需更复杂逻辑和验证有效期等）
-		sentCode := SendVerificationCode(req.Phone)
-		if req.Code != sentCode {
+		sentCode := SendVerificationCode(login_info.Phone)
+		if login_info.Code != sentCode {
 			http.Error(w, "验证码错误", http.StatusUnauthorized)
 			return
 		}
@@ -97,7 +97,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var info dao.StudentBaseInfo
-	err = dao.QueryStudent(mydao, req.Username, req.Password, req.Phone, &info)
+	err = dao.QueryStudent(mydao, login_info.Username, login_info.Password, login_info.Phone, &info)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			http.Error(w, "用户不存在或登录信息错误", http.StatusUnauthorized)
