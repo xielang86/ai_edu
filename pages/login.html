@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Login Page</title>
+    <script src="./pages/login.js"></script>
+    <style>
+        /* 简单的样式，可根据需求调整 */
+        form {
+            width: 300px;
+            margin: 0 auto;
+            border: 1px solid #ccc;
+            padding: 20px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+        <form action="http://localhost:8080/login_post" method="POST" enctype="application/x-www-form-urlencoded" >
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required/>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required/>
+        <button type="submit">Login</button>
+    </form>
+    <a href="pages/register.html" id="goToRegister">前往注册页面</a>
+</body>
+
+</html>
