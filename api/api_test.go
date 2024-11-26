@@ -71,6 +71,7 @@ func TestRegisterAndLogin(t *testing.T) {
 	// 在一个goroutine中启动Web服务器
 	go func() {
 		defer wg.Done()
+		http.HandleFunc("/", QueryHandler)
 		http.HandleFunc("/register", RegisterHandler)
 		http.HandleFunc("/login", LoginHandler)
 		err := http.ListenAndServe(":8080", nil)

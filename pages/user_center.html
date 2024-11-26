@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>个人中心</title>
+  <script src="./pages/user_center.js"></script>
+  <style>
+    /* 整体页面布局样式 */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+   .container {
+      width: 80%;
+      margin: 0 auto;
+    }
+
+    /* 各个区域的通用标题样式 */
+   .section-title {
+      font-size: 1.2em;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 5px;
+    }
+
+    /* 老师列表区域样式 */
+   .teacher-list-section {
+      margin-bottom: 20px;
+    }
+
+   .teacher-list {
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+   .teacher-button {
+      flex-basis: calc(20% - 10px);
+      margin: 5px;
+      padding: 10px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    /* 文件&证书区域样式 */
+   .file-certificate-section {
+      margin-bottom: 20px;
+    }
+
+    /* 课题中心区域样式 */
+   .project-center-section {
+      margin-bottom: 20px;
+    }
+
+    /* 个人资料区域样式 */
+   .personal-info-section {
+      margin-bottom: 20px;
+    }
+
+    /* 财务中心区域样式 */
+   .finance-center-section {
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <!-- 老师列表区域 -->
+    <div class="teacher-list-section">
+      <h2 class="section-title">老师列表</h2>
+      <div class="teacher-list" id="teacherList"></div>
+    </div>
+
+    <!-- 文件&证书区域 -->
+    <div class="file-certificate-section">
+      <h2 class="section-title">文件&证书</h2>
+      <button onclick="goToFileCabinet()">文件柜</button>
+    </div>
+
+    <!-- 课题中心区域 -->
+    <div class="project-center-section">
+      <h2 class="section-title">课题中心</h2>
+      <button onclick="goToProjectCenter()">课题中心</button>
+    </div>
+
+    <!-- 个人资料区域 -->
+    <div class="personal-info-section">
+      <h2 class="section-title">个人资料</h2>
+      <button onclick="goToPersonalInfo()">个人信息</button>
+    </div>
+
+    <!-- 财务中心区域 -->
+    <div class="finance-center-section">
+      <h2 class="section-title">财务中心</h2>
+      <button onclick="goToFinanceCenter()">财务中心</button>
+    </div>
+  </div>
+
+  <script>
+  </script>
+</body>
+
+</html>

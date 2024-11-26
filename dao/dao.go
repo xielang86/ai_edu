@@ -2,7 +2,6 @@ package dao
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	"log"
 
@@ -33,18 +32,19 @@ type EduKnowledge struct {
 
 type StudentBaseInfo struct {
 	Id           int64
-	Name         string
+	Name         string `json:"username"`
 	Age          int8
 	LessonId     string
 	LessonName   string
 	CreateTime   int64
 	ParentName   string
-	ParentDegree string
-	ParentMajor  string
-	ParentCareer string
+	ParentDegree string `json:"degree"`
+	ParentMajor  string `json:"major"`
+	ParentCareer string `json:"jobDirection"`
+	ParentSchool string `json:"graduateSchool"`
 	Fee          int32
-	PassPhrase   string
-	Phone        string
+	PassPhrase   string `json:"password"`
+	Phone        string `json:"phone"`
 }
 
 type LessonBaseInfo struct {
@@ -128,35 +128,41 @@ func QueryEduKnowledge(dao *UserDAO, query string, result *EduKnowledge) error {
 	return nil
 }
 
-func QueryStudentBaseInfo(dao *UserDAO, query string, result *StudentBaseInfo) error {
-	row := dao.db.QueryRow(query)
-
-	err := row.Scan(&result.Id, &result.Name, &result.LessonId, &result.LessonName)
-	if err != nil {
-		return err
+func QueryStudent(dao *UserDAO, name string, phone string, result *StudentBaseInfo) error {
+	select_str := "select name,age,lesson_id,lesson_name,parent_name,parent_degree,parent_major,parent_career,fee,pass_phrase,phone from"
+	name_query := ""
+	phone_query := ""
+	if len(name) > 1 {
+		name_query = fmt.Sprintf("%s knowledge_edu.student_basic_info where name=\"%s\"", select_str, name)
+	} else if len(phone) > 7 {
+		phone_query = fmt.Sprintf("%s knowledge_edu.student_basic_info where phone=\"%s\"", select_str, phone)
 	}
-	return nil
+
+	var row *sql.Row
+	if len(name_query) > 10 {
+		row = dao.db.QueryRow(name_query)
+	} else if len(phone_query) > 10 {
+		row = dao.db.QueryRow(phone_query)
+	} else {
+		return fmt.Errorf("name or phone is too short name=%s and phone=%s", name, phone)
+	}
+	err := row.Scan(&result.Name, &result.Age, &result.LessonId, &result.LessonName, &result.ParentName, &result.ParentDegree,
+		&result.ParentMajor, &result.ParentCareer, &result.Fee, &result.PassPhrase, &result.Phone)
+	if err == sql.ErrNoRows && len(name_query) > 10 {
+		row = dao.db.QueryRow(phone_query)
+		err = row.Scan(&result.Name, &result.Age, &result.LessonId, &result.LessonName, &result.ParentName, &result.ParentDegree,
+			&result.ParentMajor, &result.ParentCareer, &result.Fee, &result.PassPhrase, &result.Phone)
+	}
+	return err
 }
 
-func QueryStudent(dao *UserDAO, name string, pass string, phone string, result *StudentBaseInfo) error {
-	query := ""
-	if len(name) > 1 {
-		query = "select * from knowledge_edu.student_basic_info where name=?"
-	} else if len(phone) > 7 {
-		query = "select * from knowledge_edu.student_basic_info where phone=?"
-	}
-	err := fmt.Errorf("name or phone is too short name=%s and phone=%s", name, phone)
-	if len(query) > 10 {
-		err = QueryStudentBaseInfo(dao, query, result)
-	}
+func ModifyPassphrase(dao *UserDAO, name string, phone string, new_pass string) error {
+	sql_str := fmt.Sprintf("UPDATE student_basic_info SET pass_phrase='%s' WHERE name=\"%s\" and phone=\"%s\"",
+		new_pass, name, phone)
+	_, err := dao.db.Exec(sql_str)
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
-
-	if pass != result.PassPhrase {
-		err = errors.New("passphrase failed")
-	}
-
 	return err
 }
 
@@ -179,20 +185,20 @@ func CreateTable(dao *UserDAO, sql_str string) {
 	fmt.Println("succ create")
 }
 
-func CreateKnowledgeTable(dao *UserDAO) {
-	var knowledge_edu_create_sql string = `
-  CREATE TABLE IF NOT EXISTS  knowledge_edu.en_knowledge_point (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    level1 VARCHAR(255),
-    level2 VARCHAR(255),
-    level3 VARCHAR(255),
-    level4 VARCHAR(255),
-    level5 VARCHAR(255),
-    level5_prompt VARCHAR(1024)
-  );
-	`
-	CreateTable(dao, knowledge_edu_create_sql)
-}
+// func CreateKnowledgeTable(dao *UserDAO) {
+// 	var knowledge_edu_create_sql string = `
+//   CREATE TABLE IF NOT EXISTS  knowledge_edu.en_knowledge_point (
+//     id INT AUTO_INCREMENT PRIMARY KEY,
+//     level1 VARCHAR(255),
+//     level2 VARCHAR(255),
+//     level3 VARCHAR(255),
+//     level4 VARCHAR(255),
+//     level5 VARCHAR(255),
+//     level5_prompt VARCHAR(1024)
+//   );
+// 	`
+// 	CreateTable(dao, knowledge_edu_create_sql)
+// }
 
 func CreateStudentTable(dao *UserDAO) {
 	var sql_str string = `
@@ -269,7 +275,8 @@ func CreateFileTable(dao *UserDAO) {
 
 func InsertStudentBasicInfo(dao *UserDAO, info StudentBaseInfo) error {
 	insert_sql := `INSERT INTO student_basic_info
-	(name,age, lesson_id, lesson_name,create_time,parent_name,parent_degree,parent_major,parent_career,fee,pass_phrase,phone) 
+	(name,age, lesson_id, lesson_name,create_time,parent_name,parent_degree,parent_major,parent_career,
+	fee,pass_phrase,phone) 
 	VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`
 	_, insert_err := dao.db.Exec(insert_sql, info.Name, info.Age, info.LessonId, info.LessonName,
 		info.CreateTime, info.ParentName, info.ParentDegree, info.ParentMajor, info.ParentCareer,

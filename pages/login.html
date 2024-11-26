@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title>Login Page</title>
     <script src="./pages/login.js"></script>
+    <script src="./pages/util.js"></script>
     <style>
         /* 简单的样式，可根据需求调整 */
         form {
@@ -47,8 +48,9 @@
         <label for="password">Password:</label>
         <input type="password" id="password" name="password" required/>
         <button type="submit">Login</button>
+        <button type="button" onclick="goToResetPassword()">重置密码</button>
     </form>
-    <a href="pages/register.html" id="goToRegister">前往注册页面</a>
+    <a href="/register" id="goToRegister">前往注册页面</a>
 </body>
 
 </html>
