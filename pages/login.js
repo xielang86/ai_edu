@@ -17,8 +17,13 @@ function validateForm() {
    }
    return true;
 }
+
+window.onload = function () {
+};
+
+
 document.addEventListener('DOMContentLoaded', function () {
-  var form = document.getElementById('myForm');
+  var form = document.getElementById('loginForm');
 
   form.addEventListener('submit', async function (event) {
     // 阻止表单默认提交行为
@@ -27,6 +32,10 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!validateForm()) {
       return;
     }
+    const formData = {
+        username: document.getElementById('username').value,
+        password: document.getElementById('password').value,
+    };
     // 使用fetch发送POST请求到后端的/register_post接口
     try {
       const response = await fetch('/login_post', {
@@ -37,8 +46,11 @@ document.addEventListener('DOMContentLoaded', function () {
         body: JSON.stringify(formData)
       });
       const result = await response.json();
-      if (response.status == 200 && result.status ==='success') {
+      if (result.status ==='success') {
         alert('success login');
+        localStorage.setItem(JWT_KEY, result.token);
+        setTimeout(() => {localStorage.removeItem(JWT_KEY);}, 24 * 60 * 60 * 1000);
+        CheckAuth();
         window.location.href = "./user_center";
       } else {
         alert(result.message || 'login failed，try again');

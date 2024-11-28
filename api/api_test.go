@@ -12,8 +12,6 @@ import (
 	"time"
 )
 
-var dsn string = "xielang:lang.xie86@(127.0.0.1:3306)/knowledge_edu"
-
 func SendPostRequest(url string, data []byte) error {
 	// 将UserInfo结构体转换为JSON格式的字节切片
 
@@ -71,7 +69,6 @@ func TestRegisterAndLogin(t *testing.T) {
 	// 在一个goroutine中启动Web服务器
 	go func() {
 		defer wg.Done()
-		http.HandleFunc("/", QueryHandler)
 		http.HandleFunc("/register", RegisterHandler)
 		http.HandleFunc("/login", LoginHandler)
 		err := http.ListenAndServe(":8080", nil)

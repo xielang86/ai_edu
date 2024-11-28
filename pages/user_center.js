@@ -17,25 +17,27 @@ function renderTeacherList() {
 
 // 跳转到文件柜页面的函数（目前只是简单跳转，实际需配置正确的页面URL等）
 function goToFileCabinet() {
-  window.location.href = "file_cabinet.html";
+  window.location.href = "/file_center";
 }
 
 // 跳转到课题中心页面的函数
 function goToProjectCenter() {
-  window.location.href = "project_center.html";
+  window.location.href = "/project_center";
 }
 
 // 跳转到个人信息页面的函数
 function goToPersonalInfo() {
-  window.location.href = "personal_info.html";
+  window.location.href = "/personal_info";
 }
 
 // 跳转到财务中心页面的函数
 function goToFinanceCenter() {
-  window.location.href = "finance_center.html";
+  window.location.href = "/finance_center";
 }
 
 // 页面加载完成后渲染老师列表
 window.onload = function () {
+  CheckAuth();
+  // TODO(*): use ajax fetch teach list from web server
   renderTeacherList();
 };

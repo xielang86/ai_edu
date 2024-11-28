@@ -27,6 +27,24 @@ function sendVerificationCode(phone) {
     });
 }
 
-module.exports = {
-    sendVerificationCode: sendVerificationCode,
-};
+const JWT_KEY = 'xxoo_jwt_token';
+function CheckAuth() {
+  const token = localStorage.getItem(JWT_KEY);
+  if (token) {
+    fetch('./check_auth', {
+      method: 'GET',
+      headers: {
+        'Authorization': 'Bearer' + token
+      }
+    }).then(response => response.text())
+      .then(data => {
+        // contentDiv.textContent = data;
+      })
+      .catch(error => {
+        console.error('认证检查出错:', error);
+        contentDiv.textContent = '认证检查出错，请稍后再试';
+      });
+  } else {
+    window.location.href = '/login';
+  }
+}
