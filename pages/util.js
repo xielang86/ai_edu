@@ -36,9 +36,11 @@ function CheckAuth() {
       headers: {
         'Authorization': 'Bearer' + token
       }
-    }).then(response => response.text())
+    }).then(response => response.json())
       .then(data => {
         // contentDiv.textContent = data;
+        console.warn(data.message)
+        globalUsername = data.message
       })
       .catch(error => {
         console.error('认证检查出错:', error);

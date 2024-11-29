@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>图片 OCR 示例</title>
+  <style>
+    /* 整体页面布局 */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* 横幅区域 */
+   .banner {
+      width: 100%;
+      height: 200px;
+      background-image: url('banner.jpg');
+      background-size: cover;
+      background-position: center;
+    }
+
+    /* 按钮区域 */
+   .button-section {
+      display: flex;
+      justify-content: space-around;
+      margin: 20px 0;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    #captureButton {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    #uploadButton {
+      background-color: #008CBA;
+      color: white;
+    }
+
+    /* 示范案例区域 */
+   .demo-section {
+      margin: 20px;
+    }
+
+   .demo-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+   .demo-thumbnail {
+      width: 100px;
+      height: 100px;
+      margin-right: 10px;
+      background-color: #ccc;
+    }
+
+   .demo-title {
+      font-weight: bold;
+    }
+
+   .demo-summary {
+      margin-top: 5px;
+    }
+
+   .demo-button {
+      background-color: #f44336;
+      color: white;
+      padding: 5px 10px;
+      margin-left: auto;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- 横幅区域 -->
+  <div class="banner"></div>
+
+  <!-- 按钮区域 -->
+  <div class="button-section">
+    <button id="captureButton">拍摄作文</button>
+    <button id="uploadButton">作文上传</button>
+  </div>
+
+  <!-- 示范案例区域 -->
+  <div class="demo-section">
+    <div class="demo-row">
+      <div class="demo-thumbnail"></div>
+      <div>
+        <div class="demo-title">示例标题 1</div>
+        <div class="demo-summary">示例摘要 1</div>
+        <button class="demo-button">开始学习</button>
+      </div>
+    </div>
+    <div class="demo-row">
+      <div class="demo-thumbnail"></div>
+      <div>
+        <div class="demo-title">示例标题 2</div>
+        <div class="demo-summary">示例摘要 2</div>
+        <button class="demo-button">开始学习</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 检查浏览器是否支持 MediaDevices API（用于摄像头访问）
+    if ('mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices) {
+      const captureButton = document.getElementById('captureButton');
+      const uploadButton = document.getElementById('uploadButton');
+
+      // 拍摄作文按钮点击事件
+      captureButton.addEventListener('click', async () => {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+          const videoTrack = stream.getVideoTracks()[0];
+          const imageCapture = new ImageCapture(videoTrack);
+          const blob = await imageCapture.takePhoto();
+          // 关闭视频流
+          videoTrack.stop();
+          // 这里将拍摄的图片发送到后端进行 OCR 处理
+          // 假设后端的上传接口是 /upload
+          const formData = new FormData();
+          formData.append('image', blob);
+          const response = await fetch('/upload', {
+            method: 'POST',
+            body: formData
+          });
+          const result = await response.text();
+          console.log('OCR 结果:', result);
+        } catch (error) {
+          console.error('拍摄或上传错误:', error);
+        }
+      });
+
+      // 作文上传按钮点击事件
+      uploadButton.addEventListener('click', () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = async () => {
+          const file = input.files[0];
+          if (file) {
+            const formData = new FormData();
+            formData.append('image', file);
+            const response = await fetch('/upload', {
+              method: 'POST',
+              body: formData
+            });
+            const result = await response.text();
+            console.log('OCR 结果:', result);
+          }
+        };
+        input.click();
+      });
+    } else {
+      console.log('浏览器不支持摄像头访问或文件上传。');
+    }
+  </script>
+</body>
+
+</html>

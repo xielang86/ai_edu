@@ -1,6 +1,7 @@
 // 获取页面URL中的role参数（简单示意，实际可能需要更完善的URL解析）
 const urlParams = new URLSearchParams(window.location.search);
 const role = urlParams.get('role');
+let globalUsername;
 
 // 模拟从后端获取的文件和文件夹对应关系数据（实际需通过AJAX等请求后端接口）
 const fileFolderData = {

@@ -34,7 +34,7 @@ function goToPersonalInfo() {
 function goToFinanceCenter() {
   window.location.href = "/finance_center";
 }
-
+let globalUsername
 // 页面加载完成后渲染老师列表
 window.onload = function () {
   CheckAuth();

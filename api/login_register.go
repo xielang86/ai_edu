@@ -288,7 +288,8 @@ func CheckAuthHandler(w http.ResponseWriter, r *http.Request) {
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		username := claims["username"].(string)
-		responseData.Message = fmt.Sprintf("已认证，用户名: %s", username)
+		responseData.Message = username
+		responseData.Status = "success"
 	} else {
 		http.Error(w, "token无效", http.StatusUnauthorized)
 	}

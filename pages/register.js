@@ -1,5 +1,5 @@
 let verificationCode; // 用于存储后端发送过来的验证码
-
+let globalUsername;  // after checkauth to store the username as the id
 function toggleFields() {
   const role = document.getElementById('role').value;
   const parentFields = document.getElementById('parentFields');
