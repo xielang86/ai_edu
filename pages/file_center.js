@@ -77,5 +77,5 @@ window.onload = function () {
   CheckAuth();
   renderFolderList();
   // TODO(*): use ajax fetch teach list from web server
-  renderTeacherList();
+  // renderTeacherList();
 };

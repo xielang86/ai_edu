@@ -10,9 +10,10 @@ import (
 var kEduKnowledgeDB string = "xielang:lang.xie86@(127.0.0.1:3306)/knowledge_edu"
 
 type ResponseData struct {
-	Status  string `json:"status"`
-	Message string `json:"message"`
-	Token   string `json:"token"`
+	Status  string      `json:"status"`
+	Message string      `json:"message"`
+	Token   string      `json:"token"`
+	Data    interface{} `json:"data"`
 }
 
 func PageHandler(w http.ResponseWriter, page_path string) {

@@ -1,6 +1,9 @@
 package api
 
 import (
+	"api_server/dao"
+	"crypto/md5"
+	"database/sql"
 	"fmt"
 	"io"
 	"log"
@@ -11,7 +14,7 @@ import (
 )
 
 var (
-	local_file_root          = "../../" // just for testing
+	local_file_root          = "./local_files" // just for testing
 	tencent_cloud_cos_root   = ""
 	tencent_cloud_cos_key    = ""
 	tencent_cloud_cos_secret = ""
@@ -19,6 +22,10 @@ var (
 
 func FileCenterHandler(w http.ResponseWriter, r *http.Request) {
 	PageHandler(w, "./pages/file_center.html")
+}
+
+func FilePageHandler(w http.ResponseWriter, r *http.Request) {
+	PageHandler(w, "./pages/article.html")
 }
 
 func FileCenterPostHandler(w http.ResponseWriter, r *http.Request) {
@@ -75,38 +82,111 @@ func SaveFileToLocal(fileData []byte, filePath string) error {
 // 	return nil
 // }
 
-func UploadHandler(w http.ResponseWriter, r http.Request) {
-	// 检查请求方法是否为 POST
+func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "只支持 POST 方法", http.StatusMethodNotAllowed)
 		return
 	}
+	file, header, err := r.FormFile("file")
+	username := r.FormValue("username")
+	lesson := r.FormValue("lesson")
 
-	// 读取上传的图片文件
-	file, header, err := r.FormFile("image")
 	if err != nil {
-		http.Error(w, "读取图片文件失败", http.StatusBadRequest)
+		http.Error(w, "read file failed!", http.StatusBadRequest)
 		return
 	}
 	defer file.Close()
 
 	// 将图片文件内容读取到字节数组中
-	imageBytes, err := io.ReadAll(file)
+	fileBytes, err := io.ReadAll(file)
 	if err != nil {
 		http.Error(w, "read file failed ", http.StatusInternalServerError)
 		return
 	}
-	// save to local	path
-	filename := fmt.Sprintf("%s_%d", header.Filename, time.Now().Unix())
-	err = SaveFileToLocal(imageBytes, fmt.Sprintf("%s/%s", local_file_root, filename))
-	if err != nil {
-		http.Error(w, "store file failed", http.StatusInternalServerError)
-	}
+
+	mydao := dao.NewUserDAO(nil, kEduKnowledgeDB)
+	dao.ConnectDB(mydao)
+	defer dao.CloseDB(mydao)
+
+	// cal md5
+	hash := md5.Sum(fileBytes)
+	md5_str := fmt.Sprintf("%x", hash)
+	var file_info dao.FileInfo
+	err = dao.GetFileByMd5(mydao, md5_str, &file_info)
+	need_save := true
 
 	responseData := ResponseData{
 		Status:  "success",
 		Message: fmt.Sprintf("upload %s succ", header.Filename),
 	}
 
+	if err != nil {
+		need_save = false
+		responseData.Message = fmt.Sprintf("dedup file for %s")
+	}
+
+	// save to local	path
+	if need_save {
+		filename := fmt.Sprintf("%s_%d", header.Filename, time.Now().Unix())
+		local_file_path := fmt.Sprintf("%s/%s", local_file_root, filename)
+		err = SaveFileToLocal(fileBytes, local_file_path)
+		if err != nil {
+			http.Error(w, "store file failed", http.StatusInternalServerError)
+		}
+
+		// query for user_id
+		// TODO(*): just for test username, risk for attacking
+		var info dao.StudentBaseInfo
+		info.Name = username
+		info.Id = 0
+		if username != "default" {
+			err = dao.QueryStudent(mydao, username, "", &info)
+			if err != nil {
+				if err == sql.ErrNoRows {
+					http.Error(w, "用户不存在或登录信息错误", http.StatusUnauthorized)
+				} else {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+				}
+				return
+			}
+		} else {
+			fmt.Println("default user for test")
+		}
+		// insert record to db
+		err = dao.AddFile(mydao, info.Id, username, local_file_path, md5_str, lesson)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+	PostResponse(w, responseData)
+}
+
+type FileData struct {
+	Folder  interface{} `json:"folder"`
+	AllFile interface{} `json:"file"`
+}
+
+func GetAllFileHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "只支持 POST 方法", http.StatusMethodNotAllowed)
+		return
+	}
+
+	mydao := dao.NewUserDAO(nil, kEduKnowledgeDB)
+	dao.ConnectDB(mydao)
+	defer dao.CloseDB(mydao)
+
+	username := r.FormValue("username")
+	var result []dao.FileInfo
+	dao.QueryAllFileByUsername(mydao, username, &result)
+
+	responseData := ResponseData{
+		Status:  "success",
+		Message: fmt.Sprintf("get files succ for user ", username),
+	}
+	var data interface{}
+
+	responseData.Data = result
 	PostResponse(w, responseData)
 }

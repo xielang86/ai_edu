@@ -144,12 +144,18 @@
       uploadButton.addEventListener('click', () => {
         const input = document.createElement('input');
         input.type = 'file';
-        input.accept = 'image/*';
+        input.accept = 'image/*,application/pdf';
         input.onchange = async () => {
           const file = input.files[0];
           if (file) {
+            if (file.size > 5 * 1024 * 1024) { // 5MB
+              alert('文件大小超过限制，请选择小于 5MB 的文件');
+              return;
+            }
+
             const formData = new FormData();
-            formData.append('image', file);
+            formData.append('file', file);
+            formData.append('username', "default")
             const response = await fetch('/upload', {
               method: 'POST',
               body: formData
