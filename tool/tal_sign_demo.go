@@ -26,8 +26,8 @@ import (
 var (
 	appKeyStr = "1312055085303332864"
 	secretStr = "dcf112d1049f407babd1b027f5ae8227"
-	your_url  = "https://openai.100tal.com/aiocr/"
-	your_api  = "chcomp"
+	your_url  = "https://openai.100tal.com/aiimage/"
+	your_api  = "handrecognition-pro"
 )
 
 const request_body = "request_body"
@@ -319,20 +319,15 @@ func request(url string, body interface{}, timeout time.Duration) (error, string
 }
 
 type TalOcrReqBody struct {
-	Token string   `json:"token"`
-	Sid   string   `json:"sid"`
-	Url   []string `json:"url"`
-	Image []string `json:"image"`
+	ImageUrl    string `json:"image_url"`
+	ImageBase64 string `json:"image_base64"`
+	Function    int    `json:"function"`
 }
 
 func main() {
-
 	msg := &TalOcrReqBody{
-		Token: "aaaa",
-		Sid:   "sykpaper",
-		Url:   []string{},
-		// Image: []string{"MyqzBckAnihLUOZn59+HfjD/"},
-		Image: []string{},
+		ImageBase64: "5L2g5aW95ZWK77yM5ZWK5LiA5LqM5LiJ==",
+		Function:    1,
 	}
 
 	err, resp := request(your_api, &msg, time.Second*3)

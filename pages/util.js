@@ -1,3 +1,5 @@
+let globalUsername
+let globalUserRole
 function sendVerificationCode(phone) {
   // const phone = document.getElementById('phone').value;
   if (!phone.match(/^1[3-9]\d{9}$/)) {
@@ -28,25 +30,28 @@ function sendVerificationCode(phone) {
 }
 
 const JWT_KEY = 'xxoo_jwt_token';
-function CheckAuth() {
+async function CheckAuth() {
   const token = localStorage.getItem(JWT_KEY);
   if (token) {
-    fetch('./check_auth', {
+    const response = await fetch('./check_auth', {
       method: 'GET',
       headers: {
         'Authorization': 'Bearer' + token
       }
-    }).then(response => response.json())
-      .then(data => {
-        // contentDiv.textContent = data;
-        console.warn(data.message)
-        globalUsername = data.message
-      })
-      .catch(error => {
-        console.error('认证检查出错:', error);
-        contentDiv.textContent = '认证检查出错，请稍后再试';
-      });
+    });
+    if (response.ok) {
+      const data = await response.json()
+      const parts = data.message.split(",")
+      globalUsername = parts[0]
+      globalUserRole = parts[1]
+      return JSON.stringify({username: parts[0], role:parts[1]})
+    } else {
+      console.error('认证检查出错, login:', error);
+      window.location.href = '/login';
+      return null
+    }
   } else {
     window.location.href = '/login';
+    return null
   }
 }

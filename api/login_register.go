@@ -20,9 +20,9 @@ type LoginInfo struct {
 	Code     string `json:"code"`
 }
 
-func IsUserExist(user dao.StudentBaseInfo, mydao *dao.UserDAO) int {
-	var result dao.StudentBaseInfo
-	dao.QueryStudent(mydao, user.Name, user.Phone, &result)
+func IsUserExist(user dao.UserInfo, mydao *dao.UserDAO) int {
+	var result dao.UserInfo
+	dao.QueryUser(mydao, user.Name, user.Phone, &result)
 	fmt.Printf("tow phone %s, %s", user.Phone, result.Phone)
 	if result.Name == user.Name {
 		return 1
@@ -104,8 +104,8 @@ func LoginPostHandler(w http.ResponseWriter, r *http.Request) {
 	if !ValidLoginInfo(w, login_info) {
 		return
 	}
-	var info dao.StudentBaseInfo
-	err = dao.QueryStudent(mydao, login_info.Username, login_info.Phone, &info)
+	var info dao.UserInfo
+	err = dao.QueryUser(mydao, login_info.Username, login_info.Phone, &info)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			http.Error(w, "用户不存在或登录信息错误", http.StatusUnauthorized)
@@ -126,7 +126,7 @@ func LoginPostHandler(w http.ResponseWriter, r *http.Request) {
 		responseData.Status = "failed"
 		responseData.Message = "password error"
 	} else {
-		token, err := generateJWT(login_info.Username)
+		token, err := generateJWT(login_info.Username, info.Role)
 		if err != nil {
 			http.Error(w, "生成token失败", http.StatusInternalServerError)
 			return
@@ -143,7 +143,7 @@ func RegisterPostHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "只支持POST方法", http.StatusMethodNotAllowed)
 		return
 	}
-	var user dao.StudentBaseInfo
+	var user dao.UserInfo
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -186,7 +186,7 @@ func RegisterPostHandler(w http.ResponseWriter, r *http.Request) {
 		user.Age = 0
 		fmt.Printf("insert user name=%s and pass=%s, creat_time=%d, caree=%s, phone=%s",
 			user.Name, user.PassPhrase, user.CreateTime, user.ParentCareer, user.Phone)
-		insert_err := dao.InsertStudentBasicInfo(mydao, user)
+		insert_err := dao.InsertUserInfo(mydao, user)
 		// 插入用户数据到数据库的SQL语句
 		if insert_err != nil {
 			responseData.Status = "failed"
@@ -244,9 +244,10 @@ func ResetPassPostHandler(w http.ResponseWriter, r *http.Request) {
 // 生成JWT的密钥，应该妥善保管，实际应用中可从配置文件等获取
 var jwtSecret = []byte("your_secret_key")
 
-func generateJWT(username string) (string, error) {
+func generateJWT(username string, role string) (string, error) {
 	claims := jwt.MapClaims{
 		"username": username,
+		"role":     role,
 		"exp":      time.Now().Add(24 * time.Hour).Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -288,7 +289,9 @@ func CheckAuthHandler(w http.ResponseWriter, r *http.Request) {
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		username := claims["username"].(string)
-		responseData.Message = username
+		role := claims["role"].(string)
+		// NOTE(*): trick
+		responseData.Message = fmt.Sprintf("%s,%s", username, role)
 		responseData.Status = "success"
 	} else {
 		http.Error(w, "token无效", http.StatusUnauthorized)

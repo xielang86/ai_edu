@@ -136,11 +136,11 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 
 		// query for user_id
 		// TODO(*): just for test username, risk for attacking
-		var info dao.StudentBaseInfo
+		var info dao.UserInfo
 		info.Name = username
 		info.Id = 0
 		if username != "default" {
-			err = dao.QueryStudent(mydao, username, "", &info)
+			err = dao.QueryUser(mydao, username, "", &info)
 			if err != nil {
 				if err == sql.ErrNoRows {
 					http.Error(w, "用户不存在或登录信息错误", http.StatusUnauthorized)
@@ -185,8 +185,9 @@ func GetAllFileHandler(w http.ResponseWriter, r *http.Request) {
 		Status:  "success",
 		Message: fmt.Sprintf("get files succ for user ", username),
 	}
-	var data interface{}
 
-	responseData.Data = result
+	var data FileData
+	data.AllFile = result
+	responseData.Data = data
 	PostResponse(w, responseData)
 }

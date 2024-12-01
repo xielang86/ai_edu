@@ -1,6 +1,7 @@
 // 获取页面URL中的role参数（简单示意，实际可能需要更完善的URL解析）
 const urlParams = new URLSearchParams(window.location.search);
-const role = urlParams.get('role');
+/// const role = urlParams.get('role');
+let role = "student"
 let globalUsername;
 
 // 模拟从后端获取的文件和文件夹对应关系数据（实际需通过AJAX等请求后端接口）
@@ -74,8 +75,6 @@ function goToPersonalCenter() {
 
 // 页面加载完成后渲染文件夹列表
 window.onload = function () {
-  CheckAuth();
-  renderFolderList();
-  // TODO(*): use ajax fetch teach list from web server
-  // renderTeacherList();
+  const result = CheckAuth();
+  result.then(user_data=>renderFolderList(user_data)).then(user_data=>renderFileList(user_data));
 };

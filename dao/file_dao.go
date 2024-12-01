@@ -34,8 +34,8 @@ func CreateFileTable(dao *UserDAO) {
 }
 
 func QueryAllFileByUsername(dao *UserDAO, username string, result *[]FileInfo) error {
-	var info StudentBaseInfo
-	err := QueryStudent(dao, username, "", &info)
+	var info UserInfo
+	err := QueryUser(dao, username, "", &info)
 	var upload_user_id int64
 	upload_user_id = 0
 

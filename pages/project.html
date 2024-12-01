@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>课题进展</title>
+  <script src="./pages/util.js"></script>
+  <script src="./pages/project.js"></script>
+  <style>
+    /* 整体页面布局样式 */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* 返回按钮样式 */
+   .back-button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 5px 10px;
+      background-color: #ccc;
+      border: none;
+      cursor: pointer;
+    }
+
+    /* 各区域通用样式 */
+   .section {
+      margin: 10px;
+      padding: 10px;
+      border: 1px solid #ccc;
+    }
+
+    /* 学生信息区域样式 */
+   .student-info {
+      font-weight: bold;
+    }
+
+    /* 课题进度区域样式 */
+   .progress-section {
+      display: flex;
+      justify-content: space-around;
+    }
+
+   .progress-circle {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: 2px solid #ccc;
+    }
+
+   .completed {
+      background-color: green;
+    }
+
+    /* 问答中心区域样式 */
+   .qa-section button {
+      padding: 5px 10px;
+      background-color: #008CBA;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    /* 文件柜区域样式 */
+   .file-cabinet-section button {
+      margin: 5px;
+      padding: 5px 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+   .file-list {
+      list-style-type: none;
+      padding: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <button class="back-button">返回课题列表</button>
+
+  <!-- 学生信息区域 -->
+  <div class="section student-info">
+    <span id="student-username"></span> - <span id="project-name"></span>
+  </div>
+
+  <!-- 课题进度区域 -->
+  <div class="section progress-section">
+    <div class="progress-circle" id="initiation"></div>
+    <div class="progress-circle" id="first-review"></div>
+    <div class="progress-circle" id="mid-term"></div>
+    <div="progress-circle" id="final-review"></div>
+    <div class="progress-circle" id="completed"></div>
+  </div>
+
+  <!-- 问答中心区域 -->
+  <div class="section qa-section">
+    <button id="qa-button">进入问答中心</button>
+  </div>
+
+  <!-- 文件柜区域 -->
+  <div class="section file-cabinet-section">
+    <button id="upload-button">上传附件</button>
+    <div>
+      <button id="my-files-button">我的文件集</button>
+      <button id="teacher-files-button">老师的文件集</button>
+    </div>
+    <ul id="file-list"></ul>
+  </div>
+
+</body>
+
+</html>

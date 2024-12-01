@@ -51,6 +51,8 @@ document.addEventListener('DOMContentLoaded', function () {
         localStorage.setItem(JWT_KEY, result.token);
         setTimeout(() => {localStorage.removeItem(JWT_KEY);}, 24 * 60 * 60 * 1000);
         CheckAuth();
+        username = result.data
+        role = 
         window.location.href = "./user_center";
       } else {
         alert(result.message || 'login failed，try again');

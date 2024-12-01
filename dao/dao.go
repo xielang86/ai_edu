@@ -10,9 +10,10 @@ import (
 
 // u can change dsn for different db
 
-type StudentBaseInfo struct {
+type UserInfo struct {
 	Id           int64
 	Name         string `json:"username"`
+	Role         string `json:"role"`
 	Age          int8
 	LessonId     string
 	LessonName   string
@@ -25,42 +26,17 @@ type StudentBaseInfo struct {
 	Fee          int32
 	PassPhrase   string `json:"password"`
 	Phone        string `json:"phone"`
+	Desc         string `json:"desc"`
 }
 
-type LessonBaseInfo struct {
-	id                  int64
-	name                string
-	teacher_id          int64
-	teacher_name        string
-	involved_student_id string
-	init_file_list      string
-	create_time         int64
-}
-
-type TeacherBaseInfo struct {
-	id          int64
-	name        string
-	lesson_list string
-	create_time int64
-}
-
-type StudentLessonProcess struct {
-	student_id   int64
-	student_name string
-	lesson_id    int64
-	lesson_name  string
-	fee_info     string
-	file_list    string
-}
-
-func QueryStudent(dao *UserDAO, name string, phone string, result *StudentBaseInfo) error {
-	select_str := "select name,age,lesson_id,lesson_name,parent_name,parent_degree,parent_major,parent_career,fee,pass_phrase,phone from"
+func QueryUser(dao *UserDAO, name string, phone string, result *UserInfo) error {
+	select_str := "select name,role,age,lesson_id,lesson_name,parent_name,parent_degree,parent_major,parent_career,fee,pass_phrase,phone,text from"
 	name_query := ""
 	phone_query := ""
 	if len(name) > 1 {
-		name_query = fmt.Sprintf("%s knowledge_edu.student_basic_info where name=\"%s\"", select_str, name)
+		name_query = fmt.Sprintf("%s knowledge_edu.user_info where name=\"%s\"", select_str, name)
 	} else if len(phone) > 7 {
-		phone_query = fmt.Sprintf("%s knowledge_edu.student_basic_info where phone=\"%s\"", select_str, phone)
+		phone_query = fmt.Sprintf("%s knowledge_edu.user_info where phone=\"%s\"", select_str, phone)
 	}
 
 	var row *sql.Row
@@ -71,18 +47,18 @@ func QueryStudent(dao *UserDAO, name string, phone string, result *StudentBaseIn
 	} else {
 		return fmt.Errorf("name or phone is too short name=%s and phone=%s", name, phone)
 	}
-	err := row.Scan(&result.Name, &result.Age, &result.LessonId, &result.LessonName, &result.ParentName, &result.ParentDegree,
-		&result.ParentMajor, &result.ParentCareer, &result.Fee, &result.PassPhrase, &result.Phone)
+	err := row.Scan(&result.Name, &result.Role, &result.Age, &result.LessonId, &result.LessonName, &result.ParentName, &result.ParentDegree,
+		&result.ParentMajor, &result.ParentCareer, &result.Fee, &result.PassPhrase, &result.Phone, &result.Desc)
 	if err == sql.ErrNoRows && len(name_query) > 10 {
 		row = dao.db.QueryRow(phone_query)
-		err = row.Scan(&result.Name, &result.Age, &result.LessonId, &result.LessonName, &result.ParentName, &result.ParentDegree,
-			&result.ParentMajor, &result.ParentCareer, &result.Fee, &result.PassPhrase, &result.Phone)
+		err = row.Scan(&result.Name, &result.Role, &result.Age, &result.LessonId, &result.LessonName, &result.ParentName, &result.ParentDegree,
+			&result.ParentMajor, &result.ParentCareer, &result.Fee, &result.PassPhrase, &result.Phone, &result.Desc)
 	}
 	return err
 }
 
 func ModifyPassphrase(dao *UserDAO, name string, phone string, new_pass string) error {
-	sql_str := fmt.Sprintf("UPDATE student_basic_info SET pass_phrase='%s' WHERE name=\"%s\" and phone=\"%s\"",
+	sql_str := fmt.Sprintf("UPDATE user_info SET pass_phrase='%s' WHERE name=\"%s\" and phone=\"%s\"",
 		new_pass, name, phone)
 	_, err := dao.db.Exec(sql_str)
 	if err != nil {
@@ -94,80 +70,43 @@ func ModifyPassphrase(dao *UserDAO, name string, phone string, new_pass string) 
 func QueryStudentLessonProcess(dao *UserDAO, query string, result *StudentLessonProcess) error {
 	row := dao.db.QueryRow(query)
 
-	err := row.Scan(&result.student_id, &result.student_name, &result.lesson_id, &result.lesson_name)
+	err := row.Scan(&result.ProcessInfo, &result.StudentName, &result.LessonId, &result.LessonName)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func CreateStudentTable(dao *UserDAO) {
+func CreateUserInfoTable(dao *UserDAO) {
 	var sql_str string = `
-	CREATE TABLE IF NOT EXISTS student_basic_info (
+	CREATE TABLE IF NOT EXISTS user_info (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(255) NOT NULL,
+    name VARCHAR(128) NOT NULL,
 		role VARCHAR(32) NOT NULL,
     age TINYINT,
-    lesson_id VARCHAR(255),
-    lesson_name VARCHAR(255),
+    lesson_id VARCHAR(128),
+    lesson_name VARCHAR(128),
     create_time BIGINT,
-    parent_name VARCHAR(255),
-    parent_degree VARCHAR(255),
-    parent_major VARCHAR(255),
-    parent_career VARCHAR(255),
+    parent_name VARCHAR(128),
+    parent_degree VARCHAR(128),
+    parent_major VARCHAR(128),
+    parent_career VARCHAR(128),
+		parent_school VARCHAR(128),
     fee INT,
-    pass_phrase VARCHAR(255),
-    phone VARCHAR(255)
+    pass_phrase VARCHAR(64),
+    phone VARCHAR(64),
+		text VARCHAR(1024)
 	);
 	`
 	CreateTable(dao, sql_str)
 }
-func CreateLessonTable(dao *UserDAO) {
-	var sql_str string = `
-	CREATE TABLE IF NOT EXISTS lesson_base_info (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(255),
-    teacher_id BIGINT,
-    teacher_name VARCHAR(255),
-    involved_student_id VARCHAR(255),
-    init_file_list VARCHAR(255),
-    create_time BIGINT);
-	`
-	CreateTable(dao, sql_str)
-}
-
-func CreateTeacherTable(dao *UserDAO) {
-	var sql_str string = `
-	CREATE TABLE IF NOT EXISTS lesson_base_info (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(255),
-    lesson_list VARCHAR(255),
-    create_time BIGINT);`
-	CreateTable(dao, sql_str)
-}
-
-func CreateStudentLessonProcessTable(dao *UserDAO) {
-	var sql_str string = `
-	CREATE TABLE IF NOT EXISTS student_lesson_process (
-    student_id BIGINT,
-    student_name VARCHAR(255),
-    lesson_id BIGINT,
-    lesson_name VARCHAR(255),
-    fee_info	VARCHAR(255),
-		file_list	VARCHAR(255),
-		 PRIMARY KEY (student_id, lesson_id)
-	);
-	`
-	CreateTable(dao, sql_str)
-}
-
-func InsertStudentBasicInfo(dao *UserDAO, info StudentBaseInfo) error {
-	insert_sql := `INSERT INTO student_basic_info
-	(name,age, lesson_id, lesson_name,create_time,parent_name,parent_degree,parent_major,parent_career,
-	fee,pass_phrase,phone) 
-	VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`
-	_, insert_err := dao.db.Exec(insert_sql, info.Name, info.Age, info.LessonId, info.LessonName,
-		info.CreateTime, info.ParentName, info.ParentDegree, info.ParentMajor, info.ParentCareer,
-		info.Fee, info.PassPhrase, info.Phone)
+func InsertUserInfo(dao *UserDAO, info UserInfo) error {
+	insert_sql := `INSERT INTO user_info
+	(name,role,age, lesson_id, lesson_name,create_time,parent_name,parent_degree,parent_major,parent_career,
+	parent_school,fee,pass_phrase,phone,text) 
+	VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
+	_, insert_err := dao.db.Exec(insert_sql, info.Name, info.Role, info.Age, info.LessonId, info.LessonName,
+		info.CreateTime, info.ParentName, info.ParentDegree, info.ParentMajor, info.ParentCareer, info.ParentSchool,
+		info.Fee, info.PassPhrase, info.Phone, info.Desc)
 	return insert_err
 }
