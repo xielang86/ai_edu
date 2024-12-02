@@ -48,7 +48,7 @@ func SendSMS(phoneNumbers []string, templateID string, templateParam []string) e
 		return err
 	}
 
-	if response.Response.SendStatusSet == nil || len(response.Response.SendStatusSet) == 0 {
+	if len(response.Response.SendStatusSet) == 0 {
 		return errors.NewTencentCloudSDKError("Empty response", "", "")
 	}
 

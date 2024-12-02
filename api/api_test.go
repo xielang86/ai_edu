@@ -45,7 +45,7 @@ func SendPostRequest(url string, data []byte) error {
 	return err
 }
 
-func SendRegisterPostRequest(url string, info dao.StudentBaseInfo) error {
+func SendRegisterPostRequest(url string, info dao.UserInfo) error {
 	data, err := json.Marshal(info)
 	if err != nil {
 		return err
@@ -92,7 +92,7 @@ func TestRegisterAndLogin(t *testing.T) {
 
 	wg.Wait()
 	// construct register data
-	info := dao.StudentBaseInfo{Id: 1, Name: "xielang", Age: 30, LessonId: "lesson_1", LessonName: "fake_lesson", CreateTime: 12345678,
+	info := dao.UserInfo{Id: 1, Name: "xielang", Age: 30, LessonId: "lesson_1", LessonName: "fake_lesson", CreateTime: 12345678,
 		ParentName: "lang.xie", ParentDegree: "master", ParentMajor: "cs", ParentCareer: "cto", Fee: 1, PassPhrase: "123456", Phone: "15110245219"}
 	err := SendRegisterPostRequest("http://localhost:8080/register", info)
 	if err != nil {

@@ -7,7 +7,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"time"
 )
 
 // just for recommmend model names
@@ -36,24 +35,6 @@ type SiliconFlowRespBody struct {
 	Created int64                   `json:"created"`
 	Model   string                  `json:"model"`
 	Choices []SiliconFlowRespChoice `json:"choices"`
-}
-
-var http_client *http.Client
-
-func init() {
-	transport := &http.Transport{
-		// 设置最大空闲连接数，比如设置为10
-		MaxIdleConns: 16,
-		// 设置每个主机的最大连接数，例如设置为5
-		MaxConnsPerHost: 8,
-		// 设置空闲连接超时时间，这里设置为30秒
-		IdleConnTimeout: 30 * time.Second,
-	}
-
-	// 使用自定义的Transport创建http.Client实例
-	http_client = &http.Client{
-		Transport: transport,
-	}
 }
 
 func GetRawResp(req_body SiliconFlowReqBody, resp_body *SiliconFlowRespBody) error {

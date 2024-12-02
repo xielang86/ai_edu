@@ -50,12 +50,6 @@ func SendLoginPostRequest(url string, login_info api.LoginInfo) error {
 	return SendPostRequest(url, data)
 }
 
-type TalOcrReqBody struct {
-	ImageUrl    string `json:"image_url"`
-	ImageBase64 string `json:"image_base64"`
-	Function    int    `json:"function"`
-}
-
 func main() {
 	// login_info := api.LoginInfo{Username: "xielang", Password: "123456"}
 	// err := SendLoginPostRequest("http://localhost:8080/login_post", login_info)
@@ -63,6 +57,4 @@ func main() {
 	// 	fmt.Printf("err: %s", string(err.Error()))
 	// } else {
 	// }
-	tal_body := 
-	url := "https://openai.100tal.com/aiimage/handrecognition-pro?access_key_id=1312055085303332864&access_key="
 }

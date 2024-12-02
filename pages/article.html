@@ -21,6 +21,16 @@
       background-size: cover;
       background-position: center;
     }
+       /* 第二块区域样式 */
+    .param {
+      padding: 20px;
+    }
+
+    /* 下拉选择框样式 */
+  .select-box {
+      padding: 5px;
+      margin-right: 10px;
+    } 
 
     /* 按钮区域 */
    .button-section {
@@ -82,7 +92,40 @@
 
 <body>
   <!-- 横幅区域 -->
-  <div class="banner"></div>
+  <div class="banner">
+    <h2>AI 作文分析</h2>
+    <p>demo</p>
+  </div>
+
+  <div class="param">
+    <div>
+      <select class="select-box" id="grade">
+        <option value="1">1年级</option>
+        <option value="2">2年级</option>
+        <option value="3">3年级</option>
+        <option value="4">4年级</option>
+        <option value="5">5年级</option>
+        <option value="6">6年级</option>
+        <option value="7">7年级</option>
+        <option value="8">8年级</option>
+        <option value="9">9年级</option>
+        <option value="10">10年级</option>
+        <option value="11">11年级</option>
+        <option value="12">12年级</option>
+      </select>
+
+      <select class="select-box" id="content_type">
+        <option value="记叙文">记叙文</option>
+        <option value="说明文">说明文</option>
+        <option value="议论文">议论文</option>
+        <option value="其他">其他</option>
+      </select>
+
+      <select class="select-box" id="content_language">
+        <option value="英文">英文</option>
+        <option value="中文">中文</option>
+      </select>
+    </div>
 
   <!-- 按钮区域 -->
   <div class="button-section">
@@ -109,67 +152,7 @@
       </div>
     </div>
   </div>
-
-  <script>
-    // 检查浏览器是否支持 MediaDevices API（用于摄像头访问）
-    if ('mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices) {
-      const captureButton = document.getElementById('captureButton');
-      const uploadButton = document.getElementById('uploadButton');
-
-      // 拍摄作文按钮点击事件
-      captureButton.addEventListener('click', async () => {
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-          const videoTrack = stream.getVideoTracks()[0];
-          const imageCapture = new ImageCapture(videoTrack);
-          const blob = await imageCapture.takePhoto();
-          // 关闭视频流
-          videoTrack.stop();
-          // 这里将拍摄的图片发送到后端进行 OCR 处理
-          // 假设后端的上传接口是 /upload
-          const formData = new FormData();
-          formData.append('image', blob);
-          const response = await fetch('/upload', {
-            method: 'POST',
-            body: formData
-          });
-          const result = await response.text();
-          console.log('OCR 结果:', result);
-        } catch (error) {
-          console.error('拍摄或上传错误:', error);
-        }
-      });
-
-      // 作文上传按钮点击事件
-      uploadButton.addEventListener('click', () => {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'image/*,application/pdf';
-        input.onchange = async () => {
-          const file = input.files[0];
-          if (file) {
-            if (file.size > 5 * 1024 * 1024) { // 5MB
-              alert('文件大小超过限制，请选择小于 5MB 的文件');
-              return;
-            }
-
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('username', "default")
-            const response = await fetch('/upload', {
-              method: 'POST',
-              body: formData
-            });
-            const result = await response.text();
-            console.log('OCR 结果:', result);
-          }
-        };
-        input.click();
-      });
-    } else {
-      console.log('浏览器不支持摄像头访问或文件上传。');
-    }
-  </script>
 </body>
 
+  <script src="./pages/article.js"></script>
 </html>

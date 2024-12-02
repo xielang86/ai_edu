@@ -1,7 +1,6 @@
-package main
+package model
 
 import (
-	"bufio"
 	"bytes"
 	"crypto/hmac"
 	"crypto/sha1"
@@ -28,7 +27,6 @@ var (
 	secretStr = "dcf112d1049f407babd1b027f5ae8227"
 	your_url  = "https://openai.100tal.com/aiimage/"
 	your_api  = "handrecognition-pro"
-	// your_api = "comeducation"
 )
 
 const request_body = "request_body"
@@ -297,53 +295,66 @@ func Post(url string, body interface{}, timeout int64) (*http.Response, error) {
 
 }
 
-func request(url string, body interface{}, timeout time.Duration) (error, string) {
-	var resp string
+func request(url string, body interface{}, timeout time.Duration) (error, []byte) {
 	var r *http.Response
 	var err error
 
 	r, err = Post(url, body, int64(timeout))
 
 	if err != nil {
-		return err, ""
+		return err, []byte("")
 	}
 
 	defer r.Body.Close()
 	if r.StatusCode != 200 {
-		return fmt.Errorf("http code = %d", r.StatusCode), ""
+		return fmt.Errorf("http code = %d", r.StatusCode), []byte("")
 	}
 
-	reader := bufio.NewReader(r.Body)
-	io.Copy(os.Stdout, reader)
+	resp, err := io.ReadAll(r.Body)
+	// reader := bufio.NewReader(r.Body)
+	// io.Copy(os.Stdout, reader)
 
-	return nil, resp
+	return err, resp
 }
 
 type TalOcrReqBody struct {
 	ImageUrl    string `json:"image_url"`
-	ImageBase64 string `json:"image_base64"`
+	ImageBase64 []byte `json:"image_base64"`
 	Function    int    `json:"function"`
 }
 
-func main() {
-
-	image_path := "D:\\work\\edu\\api_server\\test_hand_ocr.jpg"
+func demo() {
+	image_path := "D:\\work\\edu\\api_server\\test_ocr.png"
 	imageBytes, err := os.ReadFile(image_path)
 	if err != nil {
 		fmt.Println("读取文件错误:", err)
 		return
 	}
-	encode_str := base64.StdEncoding.EncodeToString(imageBytes)
 	msg := &TalOcrReqBody{
-		ImageBase64: encode_str,
+		ImageBase64: imageBytes,
 		Function:    1,
 	}
 
 	err, resp := request(your_api, &msg, time.Second*3)
 
 	if err != nil {
-		fmt.Println("requestId : request metre err : %s", err.Error())
+		fmt.Printf("requestId : request metre err : %s\n", err.Error())
 	}
 
 	fmt.Printf("resp: %v\n", resp)
+}
+
+// haoweilai api
+func GetTalCompResp(lesson string, fileBytes []byte) (string, error) {
+	msg := TalOcrReqBody{
+		ImageBase64: fileBytes,
+		Function:    1,
+	}
+	err, resp := request(your_api, &msg, time.Second*3)
+
+	if err != nil {
+		fmt.Printf("requestId : request metre err : %s\n", err.Error())
+	}
+
+	return string(resp), err
 }
