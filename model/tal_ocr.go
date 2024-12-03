@@ -344,17 +344,51 @@ func demo() {
 	fmt.Printf("resp: %v\n", resp)
 }
 
+type TalHandText struct {
+	Poses [][]int `json:"poses"`
+	Probs float64 `json:"probs"`
+	Texts string  `json:"texts"`
+}
+
+type TalRespData struct {
+	HandFormula interface{}   `json:"hand_formula"`
+	HandText    []TalHandText `json:"hand_text"`
+	LineResults []TalHandText `json:"line_results"`
+	SingleBoxes []TalHandText `json:"single_boxes"`
+}
+
+type TalRespBody struct {
+	Code      int         `json:"code"`
+	Data      TalRespData `json:"data"`
+	Msg       string      `json:"msg"`
+	RequestId string      `json:"requestId"`
+}
+
+func GenContent(data *TalRespData, buffer *strings.Builder) {
+	for _, text_slice := range data.LineResults {
+		buffer.WriteString(text_slice.Texts)
+	}
+}
+
 // haoweilai api
-func GetTalCompResp(lesson string, fileBytes []byte) (string, error) {
+func GetTalCompResp(lesson string, fileBytes []byte, buffer *strings.Builder) error {
 	msg := TalOcrReqBody{
 		ImageBase64: fileBytes,
-		Function:    1,
 	}
+
 	err, resp := request(your_api, &msg, time.Second*3)
-
 	if err != nil {
-		fmt.Printf("requestId : request metre err : %s\n", err.Error())
+		fmt.Println("request tal err:", err)
+		return err
 	}
-
-	return string(resp), err
+	var resp_body TalRespBody
+	err = json.Unmarshal(resp, &resp_body)
+	if err != nil {
+		fmt.Println("parse resp data JSON failed:", err)
+		return err
+	}
+	// 访问和使用解析后的 JSON 数据
+	GenContent(&resp_body.Data, buffer)
+	// fmt.Println(buffer.String())
+	return nil
 }
