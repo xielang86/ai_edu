@@ -56,13 +56,13 @@ if ('mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices) {
           formData.append('files', file);
         }
       }
-      console.log(formData);
       const response = await fetch('/upload_ocr', {
         method: 'POST',
         body: formData
       });
       const result = await response.text();
-      console.log(result);
+      // console.log(result);
+      alert(result)
     };
     input.click();
   });

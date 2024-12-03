@@ -75,9 +75,14 @@ type CompRespBody struct {
 	Data          CompRespData `json:""`
 }
 
+var (
+	// comp_url = "https://demo.eye8.top/v1/workflows/run"
+	compUrl = "http://82.156.142.11/v1/workflows/run"
+	// appKey := "app-EC4t4gDjaaakzWFpbQCImYOe"
+	appKey = "app-sqw2CH7bT6g6fgCvt5onqKKX"
+)
+
 func GetCompRawResp(req_body *CompReqBody, resp_body *CompRespBody) error {
-	comp_url := "https://demo.eye8.top/v1/workflows/run"
-	// secrete_key := "app-EC4t4gDjaaakzWFpbQCImYOe"
 	json_data, err := json.Marshal(*req_body)
 	if err != nil {
 		log.Fatalf("JSON marshaling failed: %s", err)
@@ -85,7 +90,7 @@ func GetCompRawResp(req_body *CompReqBody, resp_body *CompRespBody) error {
 	}
 
 	// 创建一个POST请求
-	req, err := http.NewRequest("POST", comp_url, bytes.NewBuffer(json_data))
+	req, err := http.NewRequest("POST", compUrl, bytes.NewBuffer(json_data))
 	if err != nil {
 		fmt.Println("创建请求失败:", err)
 		return err
@@ -95,7 +100,7 @@ func GetCompRawResp(req_body *CompReqBody, resp_body *CompRespBody) error {
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 	// TODO(xl): mv to config
-	req.Header.Set("authorization", "Bearer app-EC4t4gDjaaakzWFpbQCImYOe")
+	req.Header.Set("authorization", fmt.Sprintf("Bearer %s", appKey))
 	resp, err := http_client.Do(req)
 	if err != nil {
 		fmt.Println("发送请求失败:", err)
