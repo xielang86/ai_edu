@@ -1,5 +1,3 @@
-let globalUsername
-let globalUserRole
 function sendVerificationCode(phone) {
   // const phone = document.getElementById('phone').value;
   if (!phone.match(/^1[3-9]\d{9}$/)) {
@@ -42,11 +40,9 @@ async function CheckAuth() {
     if (response.ok) {
       const data = await response.json()
       const parts = data.message.split(",")
-      globalUsername = parts[0]
-      globalUserRole = parts[1]
       return JSON.stringify({username: parts[0], role:parts[1]})
     } else {
-      console.error('认证检查出错, login:', error);
+      alert('back to login');
       window.location.href = '/login';
       return null
     }

@@ -1,8 +1,6 @@
 // 获取页面URL中的role参数（简单示意，实际可能需要更完善的URL解析）
-const urlParams = new URLSearchParams(window.location.search);
+// const urlParams = new URLSearchParams(window.location.search);
 /// const role = urlParams.get('role');
-let role = "student"
-let globalUsername;
 
 // 模拟从后端获取的文件和文件夹对应关系数据（实际需通过AJAX等请求后端接口）
 const fileFolderData = {
@@ -21,7 +19,7 @@ const fileFolderData = {
 };
 
 // 渲染文件夹列表
-function renderFolderList() {
+function renderFolderList(role) {
   const folderSection = document.getElementById('folderSection');
   const folders = fileFolderData[role];
   for (const folder in folders) {
@@ -53,7 +51,7 @@ function renderSubfolderList(selectedFolder) {
 }
 
 // 渲染文件列表
-function renderFileList(selectedSubfolder) {
+function renderFileList(selectedSubfolder, role) {
   const fileListSection = document.getElementById('fileListSection');
   fileListSection.innerHTML = ''; // 先清空之前的内容
   // 这里假设根据子文件夹能获取到对应的文件列表（实际需从后端获取对应关系）
@@ -73,8 +71,18 @@ function goToPersonalCenter() {
   window.location.href = "personal_center.html";
 }
 
+function init(user_data) {
+  username = user_data.username
+  role = user_data.role
+  document.getElementById("username").textContent = username
+  renderFolderList(role)
+  renderSubfolderList("all", role)
+  renderFileList("all", role)
+}
+
 // 页面加载完成后渲染文件夹列表
 window.onload = function () {
   const result = CheckAuth();
-  result.then(user_data=>renderFolderList(user_data)).then(user_data=>renderFileList(user_data));
+  // result.then(user_data=>renderFolderList(user_data)).then(user_data=>renderFileList(user_data));
+  result.then(user_data_str=>{return JSON.parse(user_data_str)}).then(user_data=>init(user_data));
 };

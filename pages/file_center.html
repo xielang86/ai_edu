@@ -31,6 +31,7 @@
     /* 第一块区域（用户名区域）样式 */
   .user-info-section {
       margin-bottom: 20px;
+      margin-top: 40px;
     }
 
    .user-info-section button {
@@ -86,14 +87,29 @@
       border-radius: 5px;
       cursor: pointer;
     }
+
+ .rectangle {
+      width: 60px;
+      height: 40px;
+      background-color: lightgray;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      border-radius: 10px;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  }
   </style>
 </head>
 
 <body>
+  <div class="rectangle">
+    <p id="page_title">文件柜</p>
+  </div>
   <div class="container">
     <!-- 第一块区域：显示用户名 -->
     <div class="user-info-section">
-      <button onclick="goToPersonalCenter()">用户名（此处应替换为真实用户名）</button>
+      <button id="username" onclick="window.location.href='/user_center'">用户名（此处应替换为真实用户名）</button>
     </div>
 
     <!-- 第二块区域：显示文件夹 -->

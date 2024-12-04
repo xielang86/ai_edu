@@ -12,7 +12,7 @@ function createTeacherList(teachers) {
   const teacherListSection = document.createElement('div');
   teacherListSection.classList.add('section');
   const title = document.createElement('h2');
-  title.textContent = '学生列表';
+  title.textContent = '老师列表';
   teacherListSection.appendChild(title);
 
   row = document.createElement('div');
@@ -197,8 +197,9 @@ function createFinanceCenter() {
 function init(user_data) {
   username = user_data.username
   role = user_data.role
+  document.getElementById("username").textContent = username
   const app = document.getElementById('user_center');
-
+  
   if (role ==='student') {
     // 模拟获取老师数据，实际需从后端获取
     const teachers = [
