@@ -14,6 +14,54 @@
       margin: 0;
       padding: 0;
     }
+          .progress-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+
+        /* 单个圆圈的样式 */
+       .circle {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            color: white;
+        }
+
+        /* 箭头的样式 */
+       .arrow {
+            width: 30px;
+            height: 2px;
+            background-color: gray;
+            margin-right: 10px;
+            margin-left: 10px;
+        }
+
+        /* 完成状态的圆圈（绿色） */
+       .completed {
+            background-color: green;
+        }
+
+        /* 完成状态的箭头（绿色） */
+       .completed +.arrow {
+            background-color: green;
+        }
+
+        /* 尚未开始状态的圆圈（灰色） */
+       .not-started {
+            background-color: gray;
+        }
+
+        /* 最后一个箭头去掉右边的外边距 */
+       .arrow:last-child {
+            margin-right: 0;
+        }
 
     /* 返回按钮样式 */
    .back-button {
@@ -36,23 +84,6 @@
     /* 学生信息区域样式 */
    .student-info {
       font-weight: bold;
-    }
-
-    /* 课题进度区域样式 */
-   .progress-section {
-      display: flex;
-      justify-content: space-around;
-    }
-
-   .progress-circle {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      border: 2px solid #ccc;
-    }
-
-   .completed {
-      background-color: green;
     }
 
     /* 问答中心区域样式 */
@@ -90,14 +121,17 @@
   </div>
 
   <!-- 课题进度区域 -->
-  <div class="section progress-section">
-    <div class="progress-circle" id="initiation"></div>
-    <div class="progress-circle" id="first-review"></div>
-    <div class="progress-circle" id="mid-term"></div>
-    <div="progress-circle" id="final-review"></div>
-    <div class="progress-circle" id="completed"></div>
-  </div>
-
+  <div class="progress-container">
+        <div class="circle not-started" id="lesson_start">开题</div>
+        <div class="arrow"></div>
+        <div class="circle not-started" id="first_check">初审</div>
+        <div class="arrow"></div>
+        <div class="circle not-started" id="middle_check">中审</div>
+        <div class="arrow"></div>
+        <div class="circle not-started" id="final_check">终审</div>
+        <div class="arrow"></div>
+        <div class="circle not-started" id="lesson_end">结束</div>
+    </div>
   <!-- 问答中心区域 -->
   <div class="section qa-section">
     <button id="qa-button">进入问答中心</button>

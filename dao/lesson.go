@@ -2,6 +2,7 @@ package dao
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -13,7 +14,7 @@ type LessonInfo struct {
 	TeacherId           int64
 	TeacherName         string `json:"teacher_name"`
 	InvolvedStudentId   string
-	InvolvedStudentName string `json:"involved_student_ name"`
+	InvolvedStudentName string `json:"involved_student_name"`
 	InitFileList        string `json:"init_file_list"`
 	CreateTime          int64
 }
@@ -72,8 +73,30 @@ func QueryLessonByName(dao *UserDAO, lesson_name string, info *LessonInfo) error
 	return nil
 }
 
+func QueryAllActiveLesson(dao *UserDAO, result *[]LessonInfo) error {
+	query := "select name, teacher_name,involved_student_name,init_file_list from lesson_info where create_time>0"
+	rows, err := dao.db.Query(query)
+	if err != nil {
+		fmt.Println("查询错误:", err)
+		return err
+	}
+	defer rows.Close()
+	var info LessonInfo
+	for rows.Next() {
+		err := rows.Scan(&info.Name, &info.TeacherName, &info.InvolvedStudentName, &info.InitFileList)
+		if err != nil {
+			fmt.Println("query allactive less mapping error:", err)
+			continue
+		}
+		// 将结构体添加到数组
+		*result = append(*result, info)
+	}
+	return err
+}
+
 func QueryAllLessonNameByUsername(dao *UserDAO, username string, result *[]string) error {
-	query := fmt.Sprintf("select lesson_name from student_lesson_process where student_name=%s", username)
+	query := fmt.Sprintf("select lesson_name from student_lesson_process where student_name=\"%s\"", username)
+
 	rows, err := dao.db.Query(query)
 	if err != nil {
 		fmt.Println("查询错误:", err)
@@ -137,6 +160,18 @@ func AddLesson(dao *UserDAO, name string, teacher_name string, init_file_list st
 	VALUES (?,?,?,?,?,?,?)`
 	_, insert_err := dao.db.Exec(insert_sql, name, user.Id, teacher_name, "", "", init_file_list, create_time)
 	return insert_err
+
+	err = QueryLessonByName(dao, name, &info)
+	if err != nil {
+		return err
+	}
+
+	user.LessonId = fmt.Sprintf("%s,%d", user.LessonId, info.Id)
+	user.LessonName = fmt.Sprintf("%s,%s", user.LessonName, info.Name)
+
+	update_sql := `UPDATE user_info SET lesson_id = '?' and lesson_name='?' WHERE id = ?;`
+	_, update_err := dao.db.Exec(update_sql, user.LessonId, user.LessonName, user.Id)
+	return update_err
 }
 
 func AddLessonForStudent(dao *UserDAO, student_name string, lesson_name string) error {
@@ -160,4 +195,28 @@ func AddLessonForStudent(dao *UserDAO, student_name string, lesson_name string) 
 	VALUES (?,?,?,?,?,?,?,?)`
 	_, insert_err := dao.db.Exec(insert_sql, user.Id, user.Name, lesson_info.Id, lesson_info.Name, "", "", "", create_time)
 	return insert_err
+}
+
+func QueryAllStudentNameByTeacher(dao *UserDAO, teacher_name string, result *[]string) error {
+	query := fmt.Sprintf("select InvolvedStudentName from lesson_info where teacher_name=\"%s\"", teacher_name)
+
+	rows, err := dao.db.Query(query)
+	if err != nil {
+		fmt.Println("查询错误:", err)
+		return err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var str_list string
+		err := rows.Scan(&str_list)
+		if err != nil {
+			fmt.Println("映射错误:", err)
+			continue
+		}
+		parts := strings.Split(str_list, ",")
+		// 将结构体添加到数组
+		*result = append(*result, parts...)
+	}
+	return nil
 }

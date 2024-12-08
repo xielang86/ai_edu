@@ -298,3 +298,31 @@ func CheckAuthHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	PostResponse(w, responseData)
 }
+
+func GetAllTeacher(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "只支持POST方法", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// TODO(xl): use dao pool to opt the performance
+	// connect to db
+	mydao := dao.NewUserDAO(nil, kEduKnowledgeDB)
+	dao.ConnectDB(mydao)
+	defer dao.CloseDB(mydao)
+
+	responseData := ResponseData{
+		Status:  "success",
+		Message: "",
+	}
+
+	var result []dao.UserInfo
+	err := dao.QueryAllUser(mydao, "teacher", &result)
+	if err != nil {
+		responseData.Status = "failed"
+		responseData.Message = "failed to get all teachers"
+	} else {
+		responseData.Data = result
+	}
+	PostResponse(w, responseData)
+}

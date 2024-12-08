@@ -13,13 +13,20 @@ func main() {
 	http.HandleFunc("/login_post", api.LoginPostHandler)
 	http.HandleFunc("/reset_pass", api.ResetpassHandler)
 	http.HandleFunc("/reset_pass_post", api.ResetPassPostHandler)
-	http.HandleFunc("/user_center", api.UserCenterHandler)
+
 	http.HandleFunc("/file_center", api.FileCenterHandler)
 	http.HandleFunc("/upload", api.UploadHandler)
 	http.HandleFunc("/upload_ocr", api.UploadAndOcrHandler)
 	http.HandleFunc("/get_all_file", api.GetAllFileHandler)
 	http.HandleFunc("/article", api.FilePageHandler)
+
+	http.HandleFunc("/user_center", api.UserCenterHandler)
+	http.HandleFunc("/get_all_project", api.GetAllProjectHandler)
+
+	http.HandleFunc("/get_all_student", api.GetAllStudentHandler)
+	http.HandleFunc("/get_all_teacher", api.GetAllTeacher)
 	http.HandleFunc("/project", api.ProjectHandler)
+	http.HandleFunc("/project_center", api.ProjectCenterHandler)
 	http.HandleFunc("/check_auth", api.CheckAuthHandler)
 	http.Handle("/pages/", http.StripPrefix("/pages/", http.FileServer(http.Dir("pages"))))
 	fmt.Println("Server starting on port :8080...")

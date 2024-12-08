@@ -8,7 +8,27 @@ function getUrlParams() {
   return params;
 }
 
-function createTeacherList(teachers) {
+async function createTeacherList() {
+  let data = {
+    username : username
+  }
+
+  const response = await fetch('/get_all_teacher', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  });
+
+  const result = await response.json();
+  if (response.status == 200 && result.status ==='success') {
+  } else {
+    alert(result.message || 'get lesson failed for current user');
+  }
+  // result.data
+  console.log(result.data)
+
   const teacherListSection = document.createElement('div');
   teacherListSection.classList.add('section');
   const title = document.createElement('h2');
@@ -19,7 +39,11 @@ function createTeacherList(teachers) {
   row.classList.add('row');
   teacherListSection.appendChild(row);
 
-  teachers.forEach((teacher, index) => {
+  if (result.data === null) {
+    return teacherListSection;
+  }
+
+  await result.data.forEach((teacher, index) => {
     if (index % 4 === 0) {
       const newRow = document.createElement('div');
       newRow.classList.add('row');
@@ -27,7 +51,7 @@ function createTeacherList(teachers) {
       row = newRow;
     }
     const button = document.createElement('button');
-    button.textContent = teacher.name;
+    button.textContent = teacher.username;
     button.addEventListener('click', () => {
       // 这里假设跳转到学生课题列表页，实际需替换真实链接
       window.location.href = `student_lessons.html?id=${student.id}`;
@@ -38,7 +62,26 @@ function createTeacherList(teachers) {
   return teacherListSection;
 }
 
-function createProjectList(projects) {
+async function createProjectList() {
+  let data = {
+    username : username
+  }
+  const response = await fetch('/get_all_project', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  });
+
+  const result = response.json();
+  if (response.status == 200 && result.status ==='success') {
+  } else {
+    alert(result.message || 'get lesson failed for current user');
+  }
+  // result.data
+  console.log(result.data)
+  
   const projectListSection = document.createElement('div');
   projectListSection.classList.add('section');
   const title = document.createElement('h2');
@@ -49,7 +92,7 @@ function createProjectList(projects) {
   row.classList.add('row');
   projectListSection.appendChild(row);
 
-  projects.forEach(project => {
+  result.data.forEach(project => {
     const button = document.createElement('button');
     button.textContent = project.name;
     row.appendChild(button);
@@ -108,18 +151,41 @@ function updateProjectList(projectListSection, projects) {
   });
 }
 
-function CreateStudentList(students) {
+async function CreateStudentList() {
+  // TODO(xl): 
+  let data = {
+    username : username
+  }
+
+  const response = await fetch('/get_all_student', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  });
+
+  const result = response.json();
+  if (response.status == 200 && result.status ==='success') {
+  } else {
+    alert(result.message || 'get lesson failed for current user');
+  }
+  // result.data
   const studentListSection = document.createElement('div');
   studentListSection.classList.add('section');
   const title = document.createElement('h2');
-  title.textContent = '老师列表';
+  title.textContent = '学生列表';
   studentListSection.appendChild(title);
 
   const row = document.createElement('div');
   row.classList.add('row');
   studentListSection.appendChild(row);
 
-  students.forEach((student, index) => {
+  if (result.data === null) {
+    return studentListSection;
+  }
+
+  result.data.forEach((student, index) => {
     if (index % 4 === 0) {
       const newRow = document.createElement('div');
       newRow.classList.add('row');
@@ -127,10 +193,10 @@ function CreateStudentList(students) {
       row = newRow;
     }
     const button = document.createElement('button');
-    button.textContent = student.name;
+    button.textContent = username;
     button.addEventListener('click', () => {
       // 假设跳转到老师个人介绍页，需替换真实链接
-      window.location.href = `teacher_info.html?id=${teacher.id}`;
+      window.location.href = `/teacher_info?id=${teacher.id}`;
     });
     row.appendChild(button);
   });
@@ -138,23 +204,50 @@ function CreateStudentList(students) {
   return studentListSection;
 }
 
-function createLessonList(lessons) {
+async function createStudentProjectList(username) {
+  // TODO(xl): safe problem, server must check jwt ?
+  let data = {
+    username : username
+  }
+
+  const response = await fetch('/get_all_project', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  });
+
+  const result = await response.json();
+  if (response.status == 200 && result.status ==='success') {
+  } else {
+    alert(result.message || 'get lesson failed for current user');
+  }
   const lessonListSection = document.createElement('div');
   lessonListSection.classList.add('section');
   const title = document.createElement('h2');
   title.textContent = '课题中心';
+  title.addEventListener('click', () => {
+    window.location.href = '/project_center';
+  });
   lessonListSection.appendChild(title);
 
   const row = document.createElement('div');
   row.classList.add('row');
   lessonListSection.appendChild(row);
 
-  lessons.forEach(lesson => {
+  if (result.data === null) {
+    return lessonListSection;
+  }
+
+  result.data.forEach(lesson => {
     const button = document.createElement('button');
     button.textContent = lesson.name;
+    button.addEventListener('click', () => {
+      window.location.href = '/project?lesson_name='+lesson.name;
+    });
     row.appendChild(button);
   });
-
   return lessonListSection;
 }
 
@@ -176,7 +269,7 @@ function createPersonalInfo() {
   const button = document.createElement('button');
   button.textContent = '个人信息';
   button.addEventListener('click', () => {
-    window.location.href = 'personal_page.html';
+    window.location.href = '/personal_page?username=username';
   });
   personalInfoSection.appendChild(button);
   return personalInfoSection;
@@ -188,13 +281,13 @@ function createFinanceCenter() {
   const button = document.createElement('button');
   button.textContent = '财务中心';
   button.addEventListener('click', () => {
-    window.location.href = 'payment_page.html';
+    window.location.href = '/payment?username=username';
   });
   financeCenterSection.appendChild(button);
   return financeCenterSection;
 }
 
-function init(user_data) {
+async function init(user_data) {
   username = user_data.username
   role = user_data.role
   document.getElementById("username").textContent = username
@@ -202,17 +295,10 @@ function init(user_data) {
   
   if (role ==='student') {
     // 模拟获取老师数据，实际需从后端获取
-    const teachers = [
-      { name: '张老师' }, { name: '李老师' }, { name: '王老师' }, { name: '赵老师' },
-      { name: '孙老师' }, { name: '刘老师' }, { name: '陈老师' }, { name: '杨老师' }
-    ];
-    const teacherListSection = createTeacherList(teachers);
+    const teacherListSection = await createTeacherList();
+    const lessonListSection = await createStudentProjectList(username);
+
     const fileCenterSection = createFileCenter();
-    // 模拟获取课题数据，实际需从后端获取
-    const lessons = [
-      { name: '课题1' }, { name: '课题2' }, { name: '课题3' }
-    ];
-    const lessonListSection = createLessonList(lessons);
     const personalInfoSection = createPersonalInfo();
     const financeCenterSection = createFinanceCenter();
 
@@ -223,22 +309,19 @@ function init(user_data) {
     app.appendChild(financeCenterSection);
   } else if (role === 'teacher') {
     // 模拟获取学生数据，实际需从后端获取
-    const students = [
-      { name: '学生1', id: 1 }, { name: '学生2', id: 2 }, { name: '学生3', id: 3 }, { name: '学生4', id: 4 },
-      { name: '学生5', id: 5 }, { name: '学生6', id: 6 }, { name: '学生7', id: 7 }, { name: '学生8', id: 8 }
-    ];
-    const studentListSection = createStudentList(students);
-    const projectListSection = createProjectList([]);
+    const studentListSection = await createStudentList();
+    const projectListSection = await createProjectList();
+
     const fileCenterSection = createFileCenter();
 
     app.appendChild(studentListSection);
     app.appendChild(projectListSection);
     app.appendChild(fileCenterSection);
   }
+  return username + "succ loaded"
 }
 
 // 页面加载完成后渲染老师列表
 window.onload = function () {
-  const result = CheckAuth();
-  result.then(user_data_str=>{return JSON.parse(user_data_str)}).then(user_data=>init(user_data));
+  CheckAuth().then(result=>JSON.parse(result)).then(user_data=>init(user_data));
 };

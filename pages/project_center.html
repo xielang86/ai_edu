@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="0, initial-scale=1.0">
+    <title>课题中心</title>
+    <style>
+      body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+h1 {
+    text-align: center;
+}
+
+.topic-item {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin: 10px auto;
+    width: 300px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.topic-link {
+    text-decoration: none;
+    color: inherit;
+    flex-grow: 1;
+    margin-right: 10px;
+}
+
+button {
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.join-btn {
+    background-color: #007BFF;
+    color: white;
+    border: none;
+}
+
+.cancel-btn {
+    background-color: #DC3545;
+    color: white;
+    border: none;
+}
+
+.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+#backToUserCenter {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 8px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+    <h1>课题中心</h1>
+    <button id="backToUserCenter">返回用户中心</button>
+    <div id="topic-container"></div>
+    <script src="./pages/util.js"></script>
+    <script src="./pages/project_center.js"></script>
+</body>
+
+</html>

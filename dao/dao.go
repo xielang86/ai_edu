@@ -29,6 +29,39 @@ type UserInfo struct {
 	Desc         string `json:"desc"`
 }
 
+func QueryAllUser(dao *UserDAO, role string, result *[]UserInfo) error {
+	select_str := fmt.Sprintf("select name,lesson_name,text from knowledge_edu.user_info where role=\"%s\"", role)
+	rows, err := dao.db.Query(select_str)
+	if err != nil {
+		fmt.Println("get all user failed:", err)
+		return err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var user UserInfo
+		err := rows.Scan(&user.Name, &user.LessonName, &user.Desc)
+		if err != nil {
+			fmt.Println("scan failed:", err)
+			continue
+		}
+
+		*result = append(*result, user)
+	}
+	return nil
+}
+
+func NormalRole(role string) string {
+	//  consistency with front end output
+	if role == "家长" || role == "学生" {
+		return "student"
+	}
+	if role == "老师" {
+		return "teacher"
+	}
+	return role
+}
+
 func QueryUser(dao *UserDAO, name string, phone string, result *UserInfo) error {
 	select_str := "select name,role,age,lesson_id,lesson_name,parent_name,parent_degree,parent_major,parent_career,fee,pass_phrase,phone,text from"
 	name_query := ""
@@ -54,6 +87,8 @@ func QueryUser(dao *UserDAO, name string, phone string, result *UserInfo) error 
 		err = row.Scan(&result.Name, &result.Role, &result.Age, &result.LessonId, &result.LessonName, &result.ParentName, &result.ParentDegree,
 			&result.ParentMajor, &result.ParentCareer, &result.Fee, &result.PassPhrase, &result.Phone, &result.Desc)
 	}
+	result.Role = NormalRole(result.Role)
+
 	return err
 }
 
@@ -65,16 +100,6 @@ func ModifyPassphrase(dao *UserDAO, name string, phone string, new_pass string) 
 		log.Fatal(err)
 	}
 	return err
-}
-
-func QueryStudentLessonProcess(dao *UserDAO, query string, result *StudentLessonProcess) error {
-	row := dao.db.QueryRow(query)
-
-	err := row.Scan(&result.ProcessInfo, &result.StudentName, &result.LessonId, &result.LessonName)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func CreateUserInfoTable(dao *UserDAO) {
@@ -101,6 +126,7 @@ func CreateUserInfoTable(dao *UserDAO) {
 	CreateTable(dao, sql_str)
 }
 func InsertUserInfo(dao *UserDAO, info UserInfo) error {
+	info.Role = NormalRole(info.Role)
 	insert_sql := `INSERT INTO user_info
 	(name,role,age, lesson_id, lesson_name,create_time,parent_name,parent_degree,parent_major,parent_career,
 	parent_school,fee,pass_phrase,phone,text) 

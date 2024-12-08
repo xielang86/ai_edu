@@ -17,10 +17,6 @@ func TestDAOCreate(t *testing.T) {
 	CreateFileTable(mydao)
 	CreateLessonTable(mydao)
 
-	var query string = "select * from knowledge_edu.student_lesson_process"
-	result := &StudentLessonProcess{}
-	QueryStudentLessonProcess(mydao, query, result)
-
 	fmt.Println("test table!")
 }
 
@@ -70,35 +66,59 @@ func TestQueryLesson(t *testing.T) {
 	mydao := NewUserDAO(nil, dsn)
 	ConnectDB(mydao)
 	defer CloseDB(mydao)
-	// insert a fake teacher
-	info := UserInfo{1, "xielang_teacher", "teacher", 30, "", "", 12345678,
-		"parent_name", "phd", "cs", "professor", "thu", 1, "12345678", "15110245219", "just a teacher"}
 
-	err := QueryUser(mydao, info.Name, "", &info)
-	if err != nil {
-		InsertUserInfo(mydao, info)
+	teachers := [3]UserInfo{
+		{Name: "黄向东", Role: "teacher", Age: 38, Phone: "12345678910"},
+		{Name: "刘英博", Role: "teacher", Age: 58, Phone: "22345678910"},
+		{Name: "何伟", Role: "teacher", Age: 48, Phone: "32345678910"},
+	}
+	for _, teacher := range teachers {
+		var user UserInfo
+		err := QueryUser(mydao, teacher.Name, "", &user)
+		if err != nil {
+			InsertUserInfo(mydao, teacher)
+		}
 	}
 
 	// insert two lesson for the teacher
-	err = AddLesson(mydao, "c++", "xielang_teacher", "")
-	err = AddLesson(mydao, "concrete_math", "xielang_teacher", "")
-	if err != nil {
-		fmt.Printf("fail! to add lesson for teacher %s", err)
+	lessons := []LessonInfo{
+		{Name: "人工智能在供应链管理中的应用", TeacherName: "黄向东"},
+		{Name: "人工智能在股票市场预测中的应用", TeacherName: "刘英博"},
+		{Name: "人工智能在人才招聘和管理中的应用", TeacherName: "刘英博"},
+		{Name: "人工智能在社交媒体营销中的应用", TeacherName: "何伟"},
+		{Name: "AI驱动的项目管理工具的效率研究", TeacherName: "何伟"},
+	}
+	for _, lesson := range lessons {
+		err := AddLesson(mydao, lesson.Name, lesson.TeacherName, "")
+		if err != nil {
+			fmt.Printf("fail! to add lesson for teacher %s", err)
+		}
 	}
 
+	type StudentLesson struct {
+		Name       string
+		LessonName string
+	}
+
+	selections := []StudentLesson{
+		{Name: "xielang", LessonName: "人工智能在供应链管理中的应用"},
+		{Name: "xielang", LessonName: "人工智能在股票市场预测中的应用"},
+		{Name: "fuyun", LessonName: "人工智能在社交媒体营销中的应用"},
+		{Name: "fuyun", LessonName: "基于人工智能结构健康检测系统"},
+	}
 	// add lesson for two student
-	err = AddLessonForStudent(mydao, "xielang", "c++")
-	err = AddLessonForStudent(mydao, "xielang", "concrete math")
-	err = AddLessonForStudent(mydao, "fuyun", "concrete_math")
-	if err != nil {
-		fmt.Printf("fail! to add lesson for student %s", err)
+	for _, a := range selections {
+		err := AddLessonForStudent(mydao, a.Name, a.LessonName)
+		if err != nil {
+			fmt.Printf("fail! to add lesson for student %s", err)
+		}
 	}
 
 	// test for query all lesson for student
 	students := []string{"xielang", "fuyun"}
 	for _, student := range students {
 		var result []string
-		err = QueryAllLessonNameByUsername(mydao, student, &result)
+		err := QueryAllLessonNameByUsername(mydao, student, &result)
 		if err != nil {
 			fmt.Printf("fail! query all less for user %s, %s", student, err)
 		} else {
