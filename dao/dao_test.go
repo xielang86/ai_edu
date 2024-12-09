@@ -87,9 +87,10 @@ func TestQueryLesson(t *testing.T) {
 		{Name: "人工智能在人才招聘和管理中的应用", TeacherName: "刘英博"},
 		{Name: "人工智能在社交媒体营销中的应用", TeacherName: "何伟"},
 		{Name: "AI驱动的项目管理工具的效率研究", TeacherName: "何伟"},
+		{Name: "基于人工智能结构健康检测系统", TeacherName: "黄向东"},
 	}
 	for _, lesson := range lessons {
-		err := AddLesson(mydao, lesson.Name, lesson.TeacherName, "")
+		err := AddLesson(mydao, lesson.Name, lesson.TeacherName, "", "")
 		if err != nil {
 			fmt.Printf("fail! to add lesson for teacher %s", err)
 		}
@@ -123,6 +124,54 @@ func TestQueryLesson(t *testing.T) {
 			fmt.Printf("fail! query all less for user %s, %s", student, err)
 		} else {
 			fmt.Printf("find %d lesson for user %s", len(result), student)
+		}
+	}
+}
+
+func TestFileForLesson(t *testing.T) {
+	type LessonFile struct {
+		LessonName   string
+		FilenameList []string
+	}
+
+	lesson_files := []LessonFile{
+		{LessonName: "人工智能在供应链管理中的应用", FilenameList: []string{"project_desc"}},
+		{LessonName: "人工智能在股票市场预测中的应用", FilenameList: []string{"project_desc,paper_list"}},
+	}
+	mydao := NewUserDAO(nil, dsn)
+	ConnectDB(mydao)
+	defer CloseDB(mydao)
+
+	for _, lesson_file := range lesson_files {
+		err := AddFileForLesson(mydao, lesson_file.LessonName, lesson_file.FilenameList)
+		if err != nil {
+			fmt.Printf("add file failed for lesson %s", lesson_file.LessonName)
+		}
+	}
+}
+
+func TestFileForStudentLessonProcess(t *testing.T) {
+	type StudentLessonFile struct {
+		StudentName  string
+		LessonName   string
+		FilenameList []string
+	}
+
+	student_lesson_files := []StudentLessonFile{
+		{StudentName: "xielang", LessonName: "人工智能在供应链管理中的应用", FilenameList: []string{"mypaper"}},
+		{StudentName: "xielang", LessonName: "人工智能在股票市场预测中的应用", FilenameList: []string{"introduction"}},
+		{StudentName: "xielang", LessonName: "人工智能在股票市场预测中的应用", FilenameList: []string{"paper"}},
+		{StudentName: "xielang", LessonName: "基于人工智能结构健康检测系统", FilenameList: []string{"erro_file"}},
+	}
+
+	mydao := NewUserDAO(nil, dsn)
+	ConnectDB(mydao)
+	defer CloseDB(mydao)
+	for _, student_lesson_file := range student_lesson_files {
+		err := AddFileForStudentLesson(mydao, student_lesson_file.StudentName, student_lesson_file.LessonName, student_lesson_file.FilenameList)
+		if err != nil {
+			fmt.Printf("add file failed for student=%s, lesson %s, filelist=%s", student_lesson_file.StudentName, student_lesson_file.LessonName, student_lesson_file.FilenameList)
+			fmt.Printf("err=%s", err)
 		}
 	}
 }

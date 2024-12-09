@@ -63,7 +63,7 @@ func NormalRole(role string) string {
 }
 
 func QueryUser(dao *UserDAO, name string, phone string, result *UserInfo) error {
-	select_str := "select name,role,age,lesson_id,lesson_name,parent_name,parent_degree,parent_major,parent_career,fee,pass_phrase,phone,text from"
+	select_str := "select id,name,role,age,lesson_id,lesson_name,parent_name,parent_degree,parent_major,parent_career,fee,pass_phrase,phone,text from"
 	name_query := ""
 	phone_query := ""
 	if len(name) > 1 {
@@ -80,11 +80,11 @@ func QueryUser(dao *UserDAO, name string, phone string, result *UserInfo) error 
 	} else {
 		return fmt.Errorf("name or phone is too short name=%s and phone=%s", name, phone)
 	}
-	err := row.Scan(&result.Name, &result.Role, &result.Age, &result.LessonId, &result.LessonName, &result.ParentName, &result.ParentDegree,
+	err := row.Scan(&result.Id, &result.Name, &result.Role, &result.Age, &result.LessonId, &result.LessonName, &result.ParentName, &result.ParentDegree,
 		&result.ParentMajor, &result.ParentCareer, &result.Fee, &result.PassPhrase, &result.Phone, &result.Desc)
 	if err == sql.ErrNoRows && len(name_query) > 10 {
 		row = dao.db.QueryRow(phone_query)
-		err = row.Scan(&result.Name, &result.Role, &result.Age, &result.LessonId, &result.LessonName, &result.ParentName, &result.ParentDegree,
+		err = row.Scan(&result.Id, &result.Name, &result.Role, &result.Age, &result.LessonId, &result.LessonName, &result.ParentName, &result.ParentDegree,
 			&result.ParentMajor, &result.ParentCareer, &result.Fee, &result.PassPhrase, &result.Phone, &result.Desc)
 	}
 	result.Role = NormalRole(result.Role)
@@ -125,6 +125,7 @@ func CreateUserInfoTable(dao *UserDAO) {
 	`
 	CreateTable(dao, sql_str)
 }
+
 func InsertUserInfo(dao *UserDAO, info UserInfo) error {
 	info.Role = NormalRole(info.Role)
 	insert_sql := `INSERT INTO user_info

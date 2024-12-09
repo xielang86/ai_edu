@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css"> <!-- 引入外部CSS文件 -->
+    <title>个人介绍页</title>
+    <style>
+      /* 整体页面布局和基本样式 */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+/* 姓名照片区域样式 */
+#profile {
+    text-align: center;
+    padding: 20px;
+    background-color: #eaeaea;
+}
+
+#profile h1 {
+    margin-bottom: 10px;
+}
+
+#profile img {
+    border-radius: 50%;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+}
+
+/* 个人简介区域样式 */
+#introduction {
+    padding: 20px;
+    margin: 20px;
+    background-color: white;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+#introduction h2 {
+    margin-top: 0;
+}
+
+/* 开设课程区域样式 */
+#courses {
+    padding: 20px;
+    margin: 20px;
+    background-color: white;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+#courses h2 {
+    margin-top: 0;
+}
+
+.course-button {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.course-button:hover {
+    background-color: #0056b3;
+}
+
+#course-description {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+    </style>
+</head>
+
+<body>
+    <!-- 第一块：姓名照片 -->
+    <div id="profile">
+        <h1>姓名：张三</h1>
+        <img src="avatar.jpg" alt="个人照片" width="200" height="200"> <!-- 替换为实际照片路径 -->
+    </div>
+
+    <!-- 第二块：个人简介 -->
+    <div id="introduction">
+        <h2>个人简介</h2>
+        <p>
+            大家好，我是张三，从事[相关行业]多年，在[专业领域]有着丰富的经验和深厚的专业知识。我热衷于分享知识，帮助他人成长，希望通过开设的课程能让更多人受益。
+        </p>
+    </div>
+
+    <!-- 第三块：开设课程 -->
+    <div id="courses">
+        <h2>开设课程</h2>
+        <button class="course-button" data-course="课程1">课程1</button>
+        <button class="course-button" data-course="课程2">课程2</button>
+        <button class="course-button" data-course="课程3">课程3</button>
+        <!-- 可以根据实际开设课程数量添加更多按钮 -->
+        <div id="course-description"></div> <!-- 用于显示课程介绍 -->
+    </div>
+
+    <script src="./pages/personal_desc.js"></script> <!-- 引入外部JavaScript文件 -->
+</body>
+
+</html>

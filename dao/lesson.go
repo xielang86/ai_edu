@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"bytes"
 	"fmt"
 	"strings"
 	"time"
@@ -17,6 +18,7 @@ type LessonInfo struct {
 	InvolvedStudentName string `json:"involved_student_name"`
 	InitFileList        string `json:"init_file_list"`
 	CreateTime          int64
+	Desc                string `json:"desc"`
 }
 
 type StudentLessonProcess struct {
@@ -40,6 +42,7 @@ func CreateLessonTable(dao *UserDAO) {
     involved_student_id VARCHAR(1024),
     involved_student_name VARCHAR(1024),
     init_file_list VARCHAR(255),
+		text VARCHAR(1024),
     create_time BIGINT);
 	`
 	CreateTable(dao, sql_str)
@@ -56,16 +59,16 @@ func CreateStudentLessonProcessTable(dao *UserDAO) {
 		file_list	VARCHAR(255),
 		process_info VARCHAR(255),
     create_time BIGINT,
-		PRIMARY KEY (student_id, lesson_id)
+		PRIMARY KEY (student_name, lesson_name)
 	);
 	`
 	CreateTable(dao, sql_str)
 }
 
 func QueryLessonByName(dao *UserDAO, lesson_name string, info *LessonInfo) error {
-	query := fmt.Sprintf("select id,name,teacher_id,teacher_name,involved_student_id,involved_student_name,init_file_list from lesson_info where name=\"%s\"", lesson_name)
+	query := fmt.Sprintf("select id,name,teacher_id,teacher_name,involved_student_id,involved_student_name,init_file_list,text from lesson_info where name=\"%s\"", lesson_name)
 	row := dao.db.QueryRow(query)
-	err := row.Scan(&info.Id, &info.Name, &info.TeacherId, &info.TeacherName, &info.InvolvedStudentId, &info.InvolvedStudentName, &info.InitFileList)
+	err := row.Scan(&info.Id, &info.Name, &info.TeacherId, &info.TeacherName, &info.InvolvedStudentId, &info.InvolvedStudentName, &info.InitFileList, &info.Desc)
 	if err != nil {
 		fmt.Printf("query lesson failed: %s, query=%s\n", err, query)
 		return err
@@ -73,8 +76,19 @@ func QueryLessonByName(dao *UserDAO, lesson_name string, info *LessonInfo) error
 	return nil
 }
 
+func QueryLessonProcessByName(dao *UserDAO, student_name string, lesson_name string, info *StudentLessonProcess) error {
+	query := fmt.Sprintf("select student_name,lesson_name,file_list,process_info from student_process_info where student_name=\"%s\" and lesson_name=\"%s\"",
+		student_name, lesson_name)
+	row := dao.db.QueryRow(query)
+	err := row.Scan(&info.StudentName, &info.LessonName, &info.FileList, &info.ProcessInfo)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func QueryAllActiveLesson(dao *UserDAO, result *[]LessonInfo) error {
-	query := "select name, teacher_name,involved_student_name,init_file_list from lesson_info where create_time>0"
+	query := "select id,name, teacher_name,involved_student_name,init_file_list,text from lesson_info where create_time>0"
 	rows, err := dao.db.Query(query)
 	if err != nil {
 		fmt.Println("查询错误:", err)
@@ -83,7 +97,7 @@ func QueryAllActiveLesson(dao *UserDAO, result *[]LessonInfo) error {
 	defer rows.Close()
 	var info LessonInfo
 	for rows.Next() {
-		err := rows.Scan(&info.Name, &info.TeacherName, &info.InvolvedStudentName, &info.InitFileList)
+		err := rows.Scan(&info.Id, &info.Name, &info.TeacherName, &info.InvolvedStudentName, &info.InitFileList, &info.Desc)
 		if err != nil {
 			fmt.Println("query allactive less mapping error:", err)
 			continue
@@ -142,7 +156,32 @@ func QueryAllLessonByUserId(dao *UserDAO, student_id int64, result *[]string) er
 	return nil
 }
 
-func AddLesson(dao *UserDAO, name string, teacher_name string, init_file_list string) error {
+func AddFileForLesson(dao *UserDAO, lesson_name string, filename_list []string) error {
+	var info LessonInfo
+	err := QueryLessonByName(dao, lesson_name, &info)
+	if err != nil {
+		return err
+	}
+	info.InitFileList = AddAndDedupString(info.InitFileList, filename_list)
+	update_sql := `UPDATE lesson_info SET init_file_list=? WHERE id=?;`
+	_, update_err := dao.db.Exec(update_sql, info.InitFileList, info.Id)
+	return update_err
+}
+
+func AddFileForStudentLesson(dao *UserDAO, student_name string, lesson_name string, filename_list []string) error {
+	var info StudentLessonProcess
+	err := QueryLessonProcessByName(dao, student_name, lesson_name, &info)
+	if err != nil {
+		return err
+	}
+
+	info.FileList = AddAndDedupString(info.FileList, filename_list)
+	update_sql := `UPDATE student_lesson_process SET file_list=? WHERE student_name=? and lesson_name=?;`
+	_, update_err := dao.db.Exec(update_sql, info.FileList, info.StudentName, info.LessonName)
+	return update_err
+}
+
+func AddLesson(dao *UserDAO, name string, teacher_name string, init_file_list string, text string) error {
 	var info LessonInfo
 	err := QueryLessonByName(dao, name, &info)
 	if err == nil {
@@ -156,22 +195,44 @@ func AddLesson(dao *UserDAO, name string, teacher_name string, init_file_list st
 	}
 	create_time := time.Now().Unix()
 	insert_sql := `INSERT INTO lesson_info
-	(name, teacher_id, teacher_name,involved_student_id,involved_student_name,init_file_list,create_time)
-	VALUES (?,?,?,?,?,?,?)`
-	_, insert_err := dao.db.Exec(insert_sql, name, user.Id, teacher_name, "", "", init_file_list, create_time)
-	return insert_err
-
-	err = QueryLessonByName(dao, name, &info)
-	if err != nil {
-		return err
+	(name, teacher_id, teacher_name,involved_student_id,involved_student_name,init_file_list,text,create_time)
+	VALUES (?,?,?,?,?,?,?,?)`
+	_, insert_err := dao.db.Exec(insert_sql, name, user.Id, teacher_name, "", "", init_file_list, text, create_time)
+	if insert_err != nil {
+		fmt.Printf("insert into lesson_info failed for lesson %s", name)
+		return insert_err
 	}
 
-	user.LessonId = fmt.Sprintf("%s,%d", user.LessonId, info.Id)
-	user.LessonName = fmt.Sprintf("%s,%s", user.LessonName, info.Name)
+	// for teacher, the lesson he teached
+	user.LessonName = AddAndDedupString(user.LessonName, []string{name})
 
-	update_sql := `UPDATE user_info SET lesson_id = '?' and lesson_name='?' WHERE id = ?;`
-	_, update_err := dao.db.Exec(update_sql, user.LessonId, user.LessonName, user.Id)
+	update_sql := `UPDATE user_info SET lesson_name=? WHERE id=?;`
+	_, update_err := dao.db.Exec(update_sql, user.LessonName, user.Id)
 	return update_err
+}
+
+func AddAndDedupString(origin_str string, new_str_array []string) string {
+	strMap := make(map[string]bool)
+	keys := strings.Split(origin_str, ",")
+	for _, key := range keys {
+		if len(key) == 0 {
+			continue
+		}
+		strMap[key] = true // 将分割后的每个元素作为键存入map，值这里简单设为true，可按需调整
+	}
+	buffer := bytes.NewBufferString("")
+	for key := range strMap {
+		buffer.WriteString(key)
+		buffer.WriteString(",")
+	}
+
+	for _, new_str := range new_str_array {
+		_, ok := strMap[new_str]
+		if !ok {
+			buffer.WriteString(new_str)
+		}
+	}
+	return buffer.String()
 }
 
 func AddLessonForStudent(dao *UserDAO, student_name string, lesson_name string) error {
@@ -194,7 +255,21 @@ func AddLessonForStudent(dao *UserDAO, student_name string, lesson_name string) 
 	(student_id,student_name,lesson_id,lesson_name,fee_info,file_list,process_info,create_time)
 	VALUES (?,?,?,?,?,?,?,?)`
 	_, insert_err := dao.db.Exec(insert_sql, user.Id, user.Name, lesson_info.Id, lesson_info.Name, "", "", "", create_time)
-	return insert_err
+
+	if insert_err != nil {
+		fmt.Printf("insert lesson process failed for %s, lesson=%s", user.Name, lesson_name)
+		return insert_err
+	}
+	// update userinfo's lesson_name and lesson_id
+	user.LessonName = AddAndDedupString(user.LessonName, []string{lesson_name})
+
+	update_sql := `UPDATE user_info SET lesson_name=? WHERE id=?;`
+	_, update_err := dao.db.Exec(update_sql, user.LessonName, user.Id)
+	if update_err != nil {
+		fmt.Printf("update lesson failed for user_info user=%s, lesson=%s", user.Name, lesson_name)
+		return update_err
+	}
+	return nil
 }
 
 func QueryAllStudentNameByTeacher(dao *UserDAO, teacher_name string, result *[]string) error {
