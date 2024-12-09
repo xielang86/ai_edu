@@ -78,6 +78,8 @@ function init(user_data) {
   renderFolderList(role)
   renderSubfolderList("all", role)
   renderFileList("all", role)
+
+
 }
 
 // 页面加载完成后渲染文件夹列表

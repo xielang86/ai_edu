@@ -154,15 +154,21 @@ func UploadFile(upload_info *UploadFileInfo) error {
 	return nil
 }
 
-func ParseFileData(r *http.Request) (UploadFileInfo, error) {
+func ParseFileData(r *http.Request, is_ocr bool) (UploadFileInfo, error) {
 	var info UploadFileInfo
-	info.ContentType = r.FormValue("content_type")
-	info.Username = r.FormValue("username")
-	info.Lesson = r.FormValue("language")
-	info.Grade = r.FormValue("grade")
-	if len(info.Grade) < 3 {
-		info.Grade = fmt.Sprintf("%s年级", info.Grade)
-		fmt.Printf("change grade to %s", info.Grade)
+	if is_ocr {
+		info.ContentType = r.FormValue("content_type")
+		info.Username = r.FormValue("username")
+		info.Lesson = r.FormValue("language")
+		info.Grade = r.FormValue("grade")
+		if len(info.Grade) < 3 {
+			info.Grade = fmt.Sprintf("%s年级", info.Grade)
+			fmt.Printf("change grade to %s", info.Grade)
+		}
+
+	} else {
+		info.Username = r.FormValue("username")
+		info.Lesson = r.FormValue("lesson_name")
 	}
 
 	err := r.ParseMultipartForm(32 << 20) // 32MB 大小限制
@@ -219,7 +225,7 @@ func UploadAndOcrHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	upload_info, err := ParseFileData(r)
+	upload_info, err := ParseFileData(r, true)
 	if err != nil {
 		http.Error(w, "parse file info failed ", http.StatusInternalServerError)
 		return
@@ -271,7 +277,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "只支持 POST 方法", http.StatusMethodNotAllowed)
 		return
 	}
-	upload_info, err := ParseFileData(r)
+	upload_info, err := ParseFileData(r, false)
 	if err != nil {
 		http.Error(w, "parse file info failed ", http.StatusInternalServerError)
 		return
@@ -289,15 +295,26 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 		Message: "upload failed!",
 	}
 
+	var filename_list []string
 	if len(upload_info.Files) > 0 {
 		buf := bytes.NewBufferString("")
 		for _, onefile := range upload_info.Files {
 			buf.WriteString(onefile.Filename)
 			buf.WriteString(",")
+			filename_list = append(filename_list, onefile.Filename)
 		}
 		responseData.Message = fmt.Sprintf("upload succ for %s", buf.String())
 	}
+	// add file to student process
+	mydao := dao.NewUserDAO(nil, kEduKnowledgeDB)
+	dao.ConnectDB(mydao)
+	defer dao.CloseDB(mydao)
 
+	err = dao.AddFileForStudentLesson(mydao, upload_info.Username, upload_info.Lesson, filename_list)
+	if err != nil {
+		fmt.Printf("add file to process failed! %s", err)
+		responseData.Message = fmt.Sprintf("%s add file to process failed", responseData.Message)
+	}
 	PostResponse(w, responseData)
 }
 

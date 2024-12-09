@@ -53,8 +53,8 @@ async function createTeacherList() {
     const button = document.createElement('button');
     button.textContent = teacher.username;
     button.addEventListener('click', () => {
-      // 这里假设跳转到学生课题列表页，实际需替换真实链接
-      window.location.href = `student_lessons.html?id=${student.id}`;
+      // 假设跳转到老师个人介绍页，需替换真实链接
+      window.location.href = `/personal_desc?username=${teacher.username}`;
     });
     row.appendChild(button);
   });
@@ -126,7 +126,6 @@ async function createProjectList() {
       dialog.close();
     });
     confirmButton.addEventListener('click', () => {
-      // 这里模拟添加课题逻辑，实际需与后端交互并更新列表展示
       const newProject = {
         name: descriptionInput.value
       };
@@ -195,8 +194,8 @@ async function CreateStudentList() {
     const button = document.createElement('button');
     button.textContent = username;
     button.addEventListener('click', () => {
-      // 假设跳转到老师个人介绍页，需替换真实链接
-      window.location.href = `/teacher_info?id=${teacher.id}`;
+      // 这里假设跳转到学生课题列表页，实际需替换真实链接
+      window.location.href = `student_lessons.html?id=${student.id}`;
     });
     row.appendChild(button);
   });
@@ -269,7 +268,7 @@ function createPersonalInfo() {
   const button = document.createElement('button');
   button.textContent = '个人信息';
   button.addEventListener('click', () => {
-    window.location.href = '/personal_page?username=username';
+    window.location.href = '/personal_desc?username=username';
   });
   personalInfoSection.appendChild(button);
   return personalInfoSection;

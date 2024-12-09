@@ -74,6 +74,8 @@ function init(user_data) {
   backButton.addEventListener('click', function() {
     window.location.href = '/user_center';
   });
+
+
 }
 
 window.onload = function () {

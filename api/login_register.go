@@ -56,6 +56,10 @@ func UserCenterHandler(w http.ResponseWriter, r *http.Request) {
 	PageHandler(w, "./pages/user_center.html")
 }
 
+func PersonalHandler(w http.ResponseWriter, r *http.Request) {
+	PageHandler(w, "./pages/personal_desc.html")
+}
+
 func ValidLoginInfo(w http.ResponseWriter, login_info LoginInfo) bool {
 	if login_info.Phone != "" && login_info.Code != "" {
 		// 先验证验证码是否正确（这里只是简单对比示例，实际可能需更复杂逻辑和验证有效期等）

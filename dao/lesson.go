@@ -77,7 +77,7 @@ func QueryLessonByName(dao *UserDAO, lesson_name string, info *LessonInfo) error
 }
 
 func QueryLessonProcessByName(dao *UserDAO, student_name string, lesson_name string, info *StudentLessonProcess) error {
-	query := fmt.Sprintf("select student_name,lesson_name,file_list,process_info from student_process_info where student_name=\"%s\" and lesson_name=\"%s\"",
+	query := fmt.Sprintf("select student_name,lesson_name,file_list,process_info from student_lesson_process where student_name=\"%s\" and lesson_name=\"%s\"",
 		student_name, lesson_name)
 	row := dao.db.QueryRow(query)
 	err := row.Scan(&info.StudentName, &info.LessonName, &info.FileList, &info.ProcessInfo)
