@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"crypto/md5"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -143,10 +144,10 @@ func UploadFile(upload_info *UploadFileInfo) error {
 		// insert record to db
 		// strick use lesson to store the info for same article
 		lesson_str := upload_info.Lesson
-		if len(lesson_str) < 1 || lesson_str == "中文" || lesson_str == "英文" {
+		if lesson_str == "中文" || lesson_str == "英文" {
 			lesson_str = upload_info.Files[0].Filename
 		}
-		err = dao.AddFile(mydao, info.Id, upload_info.Username, local_file_path, md5_str, lesson_str)
+		err = dao.AddFile(mydao, upload_info.Username, info.Role, one_file.Filename, local_file_path, md5_str, lesson_str)
 		if err != nil {
 			fmt.Printf("add file info %s to db failed for user %s\n", one_file.Filename, upload_info.Username)
 		}
@@ -305,15 +306,18 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		responseData.Message = fmt.Sprintf("upload succ for %s", buf.String())
 	}
-	// add file to student process
-	mydao := dao.NewUserDAO(nil, kEduKnowledgeDB)
-	dao.ConnectDB(mydao)
-	defer dao.CloseDB(mydao)
 
-	err = dao.AddFileForStudentLesson(mydao, upload_info.Username, upload_info.Lesson, filename_list)
-	if err != nil {
-		fmt.Printf("add file to process failed! %s", err)
-		responseData.Message = fmt.Sprintf("%s add file to process failed", responseData.Message)
+	if len(upload_info.Lesson) > 0 {
+		// add file to student process
+		mydao := dao.NewUserDAO(nil, kEduKnowledgeDB)
+		dao.ConnectDB(mydao)
+		defer dao.CloseDB(mydao)
+
+		err = dao.AddFileForStudentLesson(mydao, upload_info.Username, upload_info.Lesson, filename_list)
+		if err != nil {
+			fmt.Printf("add file to process failed! %s", err)
+			responseData.Message = fmt.Sprintf("%s add file to process failed", responseData.Message)
+		}
 	}
 	PostResponse(w, responseData)
 }
@@ -333,13 +337,31 @@ func GetAllFileHandler(w http.ResponseWriter, r *http.Request) {
 	dao.ConnectDB(mydao)
 	defer dao.CloseDB(mydao)
 
-	username := r.FormValue("username")
+	var user SimpleUser
+	// 读取请求体内容
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		fmt.Println("读取请求体出错:", err)
+		http.Error(w, "读取请求体出错", http.StatusInternalServerError)
+		return
+	}
+	defer r.Body.Close()
+
+	// 解析JSON数据到User结构体
+	err = json.Unmarshal(body, &user)
+	if err != nil {
+		fmt.Println("解析JSON出错:", err)
+		http.Error(w, "解析JSON出错", http.StatusBadRequest)
+		return
+	}
+
+	fmt.Printf("get all file handler: %s", user.Username)
 	var result []dao.FileInfo
-	dao.QueryAllFileByUsername(mydao, username, &result)
+	dao.QueryAllFileByUsername(mydao, user.Username, &result)
 
 	responseData := ResponseData{
 		Status:  "success",
-		Message: fmt.Sprintf("get files succ for user %s", username),
+		Message: fmt.Sprintf("get files succ for user %s", user.Username),
 	}
 
 	var data FileData

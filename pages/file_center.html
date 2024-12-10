@@ -89,7 +89,7 @@
     }
 
  .rectangle {
-      width: 60px;
+      width: 100px;
       height: 40px;
       background-color: lightgray;
       display: flex;
@@ -99,17 +99,22 @@
       border-radius: 10px;
       box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
   }
+         .title {
+               text-align: center;
+               font-size: 15px;
+           }
   </style>
 </head>
 
 <body>
   <div class="rectangle">
-    <p id="page_title">文件柜</p>
+    <h1 id="page_title" class="title">文件柜</h1>
   </div>
   <div class="container">
     <!-- 第一块区域：显示用户名 -->
     <div class="user-info-section">
       <button id="username" onclick="window.location.href='/user_center'">用户名（此处应替换为真实用户名）</button>
+      <button id="upload-button">上传附件</button>
     </div>
 
     <!-- 第二块区域：显示文件夹 -->

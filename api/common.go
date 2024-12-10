@@ -16,6 +16,11 @@ type ResponseData struct {
 	Data    interface{} `json:"data"`
 }
 
+type SimpleUser struct {
+	Username string `json:"username"`
+	Role     string `json:"role"`
+}
+
 func PageHandler(w http.ResponseWriter, page_path string) {
 	t, err := template.ParseFiles(page_path)
 	if err != nil {

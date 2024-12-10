@@ -21,6 +21,7 @@ func main() {
 	http.HandleFunc("/article", api.FilePageHandler)
 
 	http.HandleFunc("/user_center", api.UserCenterHandler)
+	http.HandleFunc("/personal_desc", api.PersonalHandler)
 	http.HandleFunc("/get_all_project", api.GetAllProjectHandler)
 
 	http.HandleFunc("/get_all_student", api.GetAllStudentHandler)
