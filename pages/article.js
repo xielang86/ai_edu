@@ -1,5 +1,5 @@
 // 检查浏览器是否支持 MediaDevices API（用于摄像头访问）
-if ('mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices) {
+// if ('mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices) {
   const captureButton = document.getElementById('captureButton');
   const uploadButton = document.getElementById('uploadButton');
 
@@ -66,6 +66,6 @@ if ('mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices) {
     };
     input.click();
   });
-} else {
-  console.log('浏览器不支持摄像头访问或文件上传。');
-}
+// } else {
+//   console.log('浏览器不支持摄像头访问或文件上传。');
+// }
