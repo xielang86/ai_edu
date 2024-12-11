@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="./pages/css/user_project_center.css">
+    <title>用户课题中心</title>
+</head>
+
+<body>
+    <!-- Banner 区域 -->
+    <div class="banner">
+        <img src="./pages/css/back1.jpg" alt="课题中心">
+        <h1>用户课题中心</h1>
+    </div>
+
+    <!-- 主体内容区域 -->
+    <div class="main-content" style="background-color: lightgray;">
+        <!-- 第二部分 -->
+        <div class="section-2">
+            <label>用户名：</label>
+            <span id="username">具体用户名</span>
+        </div>
+        <!-- 第三部分 -->
+        <div class="section-3">
+            <label>文件柜</label>
+            <button class="upload-btn" id="upload-button">上传文件</button>
+            <button class="manage-btn">管理文件</button>
+        </div>
+        <!-- 第四部分 -->
+        <div class="section-4">
+            <!-- 文件列表 -->
+            <div id="file-list" class="file-list">
+                <!-- 可根据需要添加更多文件项 -->
+            </div>
+            <!-- 公告栏 -->
+            <div class="announcement">
+                <h4>公告栏</h4>
+                <p>清普计划正式启动</p>
+            </div>
+        </div>
+        <!-- 第五部分（分页区域） -->
+        <div class="section-5">
+            <div class="pagination">
+                <span class="page-item current">1</span>
+                <button class="next-btn">下一页</button>
+                <button class="first-btn">首页</button>
+                <button class="last-btn">尾页</button>
+            </div>
+        </div>
+    </div>
+</body>
+  <script src="./pages/util.js"></script>
+  <script src="./pages/scripts/user_project_center.js"></script>
+
+</html>

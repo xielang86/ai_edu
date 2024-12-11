@@ -89,6 +89,9 @@ func SendVerificationCodeHandler(c *gin.Context) {
 	expirationTime := time.Now().Unix() + 120 // 验证码有效期120秒（2分钟），可按需调整
 
 	// 调用阿里云短信服务发送验证码（此处需替换为真实有效的配置）
+	// accessKeyId("LTAI5tLUFcjzBxkSrKtrMGTz")
+	// accessKeySecret("rxp45PovC6lq0rl09k1dGmyLFWnIva")
+	// 模板CODE：SMS_254130904
 	// err := SendSMS({phone}, "", {code})
 	// if err != nil {
 	// 	c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "验证码发送失败"})

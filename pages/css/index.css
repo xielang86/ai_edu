@@ -1,0 +1,79 @@
+/* 整体页面样式 */
+body {
+    margin: 0;
+    padding: 0;
+    background-image: url('./back2.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no - repeat;
+    background-color: purple;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* 容器样式，用于包裹登录块 */
+.login-form {
+    width: 40%;
+    height: 100%;
+    margin-right: 15px;
+}
+/* 登录块整体样式 */
+.login-block {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+/* 标题样式 */
+.title {
+    text-align: center;
+}
+
+/* 输入框样式 */
+.input-field {
+    width: 80%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    align-items: center;
+}
+
+/* 忘记密码链接样式 */
+.forgot-password {
+    color: blue;
+    text-decoration: none;
+    display: block;
+    margin-bottom: 10px;
+    text-align: right;
+}
+
+/* 登录和注册按钮样式 */
+.login-btn,
+.register-btn {
+    width: 40%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    background-color: purple;
+    cursor: pointer;
+}
+
+/* 协议相关样式 */
+.agreement {
+    display: flex;
+    align-items: center;
+}
+
+.agreement input[type="checkbox"] {
+    margin-right: 5px;
+}
+
+.agreement a {
+    color: blue;
+    text-decoration: none;
+}

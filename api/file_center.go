@@ -127,7 +127,7 @@ func UploadFile(upload_info *UploadFileInfo) error {
 		hash := md5.Sum(one_file.FileBytes)
 		md5_str := fmt.Sprintf("%x", hash)
 		var file_info dao.FileInfo
-		err := dao.GetFileByMd5(mydao, md5_str, &file_info)
+		err := dao.GetFileByMd5(mydao, upload_info.Username, md5_str, &file_info)
 		if err == nil {
 			fmt.Printf("do not save dedup file %s\n", one_file.Filename)
 			return nil

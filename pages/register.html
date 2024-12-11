@@ -2,103 +2,81 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>注册页面</title>
-  <script src="./pages/register.js"></script>
-  <script src="./pages/util.js"></script>
-  <style>
-    form {
-      width: 300px;
-      margin: 0 auto;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 5px;
-    }
-
-    input {
-      width: 100%;
-      padding: 8px;
-      margin-bottom: 15px;
-      border: 1px solid #ccc;
-      border-radius: 3px;
-    }
-
-    button {
-      background-color: #007bff;
-      color: white;
-      border: none;
-      padding: 10px 15px;
-      border-radius: 3px;
-      cursor: pointer;
-    }
-
- .error {
-      color: red;
-      margin-top: -10px;
-      margin-bottom: 10px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="./pages/css/register.css">
+    <title>创建账号页面</title>
 </head>
 
 <body>
-  <form id="registrationForm">
-    <label for="role">角色:
-      <select id="role"  name="role" onchange="toggleFields()"  required>
-        <option value="student">家长</option>
-        <option value="teacher">老师</option>
-      </select>
-    </label>
-    <label for="username">用户名（英文数字和下划线组成）:
-      <input type="text" id="username" name="username" pattern="[a-zA-Z0-9_]+" required>
-    </label>
-    <label for="phone">手机号:
-      <input type="text" id="phone" name="username" required>
-      <button type="button" onclick="sendVerificationCode()">发送验证码</button>
-    </label>
-    <label for="verificationCode">验证码:
-      <input type="text" id="verificationCode" name="verificationCode" required>
-    </label>
-    <label for="password">密码（6到20位）:
-      <input type="password" id="password" name="password" pattern=".{6,20}" required>
-    </label>
-    <label for="confirmPassword">重复输入密码:
-      <input type="password" id="confirmPassword" name="confirmPassword" required>
-    </label>
-    <div id="parentFields"></div>
-      <label for="graduateSchool">毕业院校:
-        <select id="graduateSchool" name="graduateSchool" onchange="enableOtherInput()">
-          <option value="清华大学">清华大学</option>
-          <option value="北京大学">北京大学</option>
-          <option value="复旦大学">复旦大学</option>
-          <option value="上海交通大学">上海交通大学</option>
-          <option value="其他">其他</option>
-        </select>
-      </label>
-      <label for="major">专业方向:
-        <select id="major" name="major">
-          <option value="计算机科学与技术">计算机科学与技术</option>
-          <option value="电子信息工程">电子信息工程</option>
-          <option value="工商管理">工商管理</option>
-          <option value="金融学">金融学</option>
-        </select>
-      </label>
-      <label for="degree">最高学位:
-        <select id="degree" name="degree">
-          <option value="学士">学士</option>
-          <option value="硕士">硕士</option>
-          <option value="博士">博士</option>
-          <option value="其他">其他</option>
-        </select>
-      </label>
-      <label for="jobDirection">岗位方向:
-        <input type="text" id="jobDirection" name="jobDirection">
-      </label>
+    <!-- Banner 区域 -->
+    <div class="banner">
+        <img src="./pages/css/back1.jpg" alt="创建账号">
+        <h1>创建账号</h1>
     </div>
-    <button type="submit">下一步</button>
-  </form>
+    <!-- 正文内容区域 -->
+    <div class="main-content">
+        <!-- 第一块内容 -->
+        <div class="section-1">
+            <div class="form-row">
+                <label for="role">角色：</label>
+                <select id="role">
+                    <option value="parent">家长</option>
+                    <option value="teacher">老师</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label for="username">用户名：</label>
+                <input type="text" id="username">
+            </div>
+            <div class="form-row">
+                <label for="phone">手机号：</label>
+                <input type="text" id="phone">
+                <button class="send-code-btn">发送验证码</button>
+            </div>
+            <div class="form-row">
+                <label for="verify_code">验证码</label>
+                <input type="text" id="verify_code">
+            </div>
+            <div class="form-row">
+                <label for="password">密码：</label>
+                <input type="password" id="password">
+            </div>
+            <div class="form-row">
+                <label for="password-confirm">重复输入：</label>
+                <input type="password" id="password-confirm">
+            </div>
+        </div>
+        <!-- 第二块内容 -->
+        <div class="section-2">
+            <h2>家长信息</h2>
+            <div class="form-row">
+                <label for="graduateSchool">毕业院校：</label>
+                <input type="text" id="graduateSchool">
+            </div>
+            <div class="form-row">
+                <label for="major">专业方向：</label>
+                <input type="text" id="major">
+            </div>
+            <div class="form-row">
+                <label for="degree">最高学位：</label>
+                <select id="degree">
+                    <option value="bachelor">本科</option>
+                    <option value="master">硕士</option>
+                    <option value="doctor">博士</option>
+                    <option value="other">其他</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label for="jobDirection">岗位方向：</label>
+                <input type="text" id="jobDirection">
+            </div>
+        </div>
+    <button id="confirm-btn" class="confirm-btn">确认</button>
+
+    </div>
 </body>
+
+  <script src="./pages/util.js"></script>
+  <script src="./pages/scripts/register.js"></script>
 
 </html>

@@ -43,11 +43,29 @@ async function CheckAuth() {
       return JSON.stringify({username: parts[0], role:parts[1]})
     } else {
       alert('back to login');
-      window.location.href = '/login';
+      window.location.href = '/index';
       return null
     }
   } else {
-    window.location.href = '/login';
+    window.location.href = '/index';
     return null
   }
+}
+
+function getIconPath(fileName) {
+    const fileExtension = fileName.split('.').pop().toLowerCase();
+    switch (fileExtension) {
+        case 'doc':
+        case 'docx':
+            return './pages/images/doc_icon.jpeg';
+        case 'pdf':
+            return './pages/images/pdf_icon.jpeg';
+        case 'jpg':
+        case 'png':
+        case 'jpeg':
+        case 'gif':
+            return './pages/images/icon_image.png';
+        default:
+            return './pages/images/icon_default.png';
+    }
 }

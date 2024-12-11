@@ -1,0 +1,166 @@
+/* 整体页面样式 */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    align-items: stretch;
+    justify-content: flex-start;
+}
+
+/* Banner 区域样式 */
+.banner {
+    height: 20%;
+    text-align: center;
+    color: white;
+    position: relative;
+}
+
+.banner img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.banner h1 {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+    font-size: 32px;
+    z-index : 1;
+}
+
+/* 主体内容区域样式 */
+.main-content {
+    position: relative;
+    height: 100%;
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 各部分通用样式 */
+.section-1 h2,
+.section-2 label,
+.section-3 h3,
+.section-4 h4 {
+    margin: 0;
+    padding-bottom: 10px;
+}
+
+/* 第一部分样式 */
+.section-1 h2 {
+    color: purple;
+}
+
+/* 第二部分样式 */
+.section-2 {
+    margin-bottom: 5px;
+}
+
+.section-2 label {
+    display: inline-block;
+    width: 80px;
+}
+
+/* 第三部分样式 */
+.section-3 {
+    margin-bottom: 20px;
+}
+
+.section-3 button {
+    background-color: #00cc99; /* 天蓝色带一点绿的颜色 */
+    border: none;
+    padding: 10px 20px;
+    margin-right: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    color: white;
+}
+
+/* 第四部分样式 */
+.section-4 {
+    display: flex;
+    flex: 1;
+}
+
+.file-list {
+    width: 70%;
+}
+
+.file-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.file-thumbnail {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+}
+
+.file-name {
+    color: #00cc99;
+    text-decoration: none;
+}
+
+.announcement {
+    width: 30%;
+    padding-left: 20px;
+}
+
+/* 第五部分（分页区域）样式 */
+.section-5 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.pagination {
+    display: flex;
+    list-style: none;
+    padding: 0;
+}
+
+.page-item {
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    text-align: center;
+    border: 1px solid #ccc;
+    margin-right: 5px;
+    cursor: pointer;
+}
+
+.current {
+    background-color: green;
+    color: white;
+}
+
+.ellipsis {
+    border: none;
+    cursor: default;
+}
+
+.next-btn,
+.first-btn,
+.last-btn {
+    background-color: #00cc99;
+    border: none;
+    padding: 10px 10px;
+    margin-left: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    color: white;
+    height: 20px;
+    font-size: clamp(8px, 10px, 16px);
+    text-align: center;
+    line-height: 5px; /* 根据按钮高度和内边距等情况调整，使文字垂直居中  */
+    box-sizing: border-box;
+}

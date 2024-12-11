@@ -1,0 +1,120 @@
+/* 整体页面样式 */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    align-items: stretch;
+    justify-content: flex-start;
+}
+
+/* Banner 区域样式 */
+.banner {
+    height: 20%;
+    position: relative;
+    text-align: center;
+    color: white;
+}
+.banner img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.banner h1 {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+    font-size: 32px;
+    z-index : 1;
+}
+
+.banner:after {
+    content: "";
+    position: absolute;
+    bottom: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 300px;
+    height: 2px;
+    background-color: white;
+}
+
+/* 主体内容区域样式 */
+.main-content {
+    height: 80%;
+    padding: 20px;
+}
+
+/* 各部分通用样式 */
+.section-1 label,
+.section-2 label {
+    display: inline-block;
+    width: 100px;
+    align-items: center;
+}
+
+/* 第一块内容样式 */
+.section-1 {
+    margin-bottom: 20px;
+    align-items: center;
+}
+
+.section-1.form-row {
+    text-align: center;
+    margin-bottom: 10px;
+    align-items: center;
+}
+
+.section-1 select,
+.section-1 input {
+    width: 200px;
+    align-items: center;
+}
+
+.section-1.send-code-btn {
+    background-color: green;
+    border: none;
+    padding: 10px 20px;
+    margin-left: 10px;
+    border-radius: 5px;
+    color: white;
+}
+
+/* 第二块内容样式 */
+.section-2 {
+    align-items: center;
+}
+
+.section-2 h2 {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.section-2.form-row {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.section-2 select,
+.section-2 input {
+    width: 200px;
+    align-items: center;
+}
+
+/* 确认按钮样式 */
+.confirm-btn {
+    background-color: purple;
+    border: none;
+    padding: 10px 20px;
+    margin-top: 20px;
+    border-radius: 5px;
+    color: white;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}

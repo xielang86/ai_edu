@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="./pages/css/index.css">
+    <title>登录页面</title>
+</head>
+
+<body>
+
+        <div class="login-block">
+            <h2 class="title">账户登录</h2>
+            <input type="text" id="username" placeholder="用户名" class="input-field" />
+            <input type="password" id="password" placeholder="密码" class="input-field" />
+            <a href="#" class="forgot-password" id="reset_password" onclick="goToResetPassword()" >忘记密码？</a>
+            <button id="login-btn" class="login-btn">登录</button>
+            <button class="register-btn" id="register-btn">注册</button>
+
+            <div class="agreement">
+                <input type="checkbox" id="agree-checkbox">
+                <label for="agree-checkbox">阅读并接受 <a href="#" class="user-agreement">用户协议</a> 和 <a
+                        href="#" class="user-privacy">隐私政策</a></label>
+            </div>
+    </form>
+    <script src="./pages/scripts/index.js"></script>
+    <script src="./pages/util.js"></script>
+</body>
+
+</html>
