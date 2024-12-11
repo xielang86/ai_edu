@@ -2,69 +2,50 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>重置密码</title>
-  <script src="./pages/util.js"></script>
-  <script src="./pages/reset_pass.js"></script>
-  <style>
-    form {
-      width: 300px;
-      margin: 0 auto;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 5px;
-    }
-
-    input {
-      width: 100%;
-      padding: 8px;
-      margin-bottom: 15px;
-      border: 1px solid #ccc;
-      border-radius: 3px;
-    }
-
-    button {
-      background-color: #007bff;
-      color: white;
-      border: none;
-      padding: 10px 15px;
-      border-radius: 3px;
-      cursor: pointer;
-    }
-
-    button[type="button"] {
-      background-color: #ccc;
-      margin-bottom: 10px;
-    }
-
-   .error {
-      color: red;
-      margin-top: -10px;
-      margin-bottom: 10px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="./pages/css/reset_pass.css">
+    <title>重置密码页面</title>
 </head>
 
 <body>
-  <form id="resetPasswordForm">
-    <label for="phone">手机号:
-      <input type="text" id="phone" required>
-    </label>
-    <button type="button" onclick="sendVerificationCode()">发送验证码</button>
-    <label for="verificationCode">验证码:
-      <input type="text" id="verificationCode" required>
-    </label>
-    <label for="newPassword">新密码（6到20位）:
-      <input type="password" id="newPassword" pattern=".{6,20}" required>
-    </label>
-    <label for="confirmPassword">重复输入密码:
-      <input type="password" id="confirmPassword" required>
-    </label>
-    <button type="submit">提交</button>
-  </form>
+    <!-- Banner 区域 -->
+    <div class="banner">
+        <img src="./pages/css/back1.jpg" alt="重置密码">
+        <h1>重置密码</h1>
+    </div>
+    <!-- 正文内容区域 -->
+    <div class="main-content">
+        <!-- 第一块内容 -->
+        <div class="section-1">
+            <div class="form-row">
+                <label for="username">用户名：</label>
+                <input type="text" id="username">
+            </div>
+            <div class="form-row">
+                <label for="phone">手机号：</label>
+                <input type="text" id="phone">
+                <button class="send-code-btn">发送验证码</button>
+            </div>
+            <div class="form-row">
+                <label for="verify_code">验证码</label>
+                <input type="text" id="verify_code">
+            </div>
+            <div class="form-row">
+                <label for="password">密码：</label>
+                <input type="password" id="password">
+            </div>
+            <div class="form-row">
+                <label for="password-confirm">重复输入：</label>
+                <input type="password" id="password-confirm">
+            </div>
+        </div>
+        <!-- 第二块内容 -->
+        <div class="section-2">
+            <button class="confirm-btn">确认</button>
+        </div>
+    </div>
 </body>
 
+  <script src="./pages/util.js"></script>
+  <script src="./pages/scripts/reset_pass.js"></script>
 </html>
