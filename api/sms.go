@@ -39,9 +39,6 @@ func generateVerificationCode() string {
 // templateID := "your_template_id"         // 替换为你在腾讯云短信服务配置的短信模板ID
 // templateParam := []string{`{"code":"123456"}`}      // 替换为真实的模板参数，格式要与短信模板定义的参数格式一致
 func AliSendSMS(phoneNumbers string, templateID string, templateParam string) error {
-	// accessKeyId("LTAI5tLUFcjzBxkSrKtrMGTz")
-	// accessKeySecret("rxp45PovC6lq0rl09k1dGmyLFWnIva")
-	// 模板CODE：SMS_254130904
 	// err := SendSMS({phone}, "", {code})
 	// if err != nil {
 	// 	c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "验证码发送失败"})
