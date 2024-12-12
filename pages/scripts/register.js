@@ -47,7 +47,11 @@ async function DoRegister() {
  }
 }
 
-const backButton = document.getElementById('confirm-btn');
-backButton.addEventListener('click', function() {
+const confirmButton = document.getElementById('confirm-btn');
+confirmButton.addEventListener('click', function() {
   DoRegister()
 });
+
+const smsButton = document.getElementById("sms_btn");
+const phoneInput = document.getElementById("phone")
+RegisterSMS(smsButton, phoneInput)

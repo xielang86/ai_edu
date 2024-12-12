@@ -1,18 +1,31 @@
 package api
 
 import (
-	"log"
+	"encoding/json"
+	"fmt"
+	"io"
 	"math/rand"
 	"net/http"
 	"strconv"
 	"sync"
 	"time"
+)
 
-	"github.com/gin-gonic/gin"
-	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common"
-	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/errors"
-	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/profile"
-	sms "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/sms/v20210111"
+type VerifyCodeReqData struct {
+	Phone string `json:"phone"`
+	Code  string `json:"code"`
+}
+
+// VerificationCodeInfo 存储验证码相关信息
+type VerificationCodeInfo struct {
+	Code     string
+	SendTime time.Time
+}
+
+var (
+	verificationCodes = make(map[string]*VerificationCodeInfo)
+	verify_mutex      sync.Mutex
+	expirationMinutes = 1
 )
 
 // generateVerificationCode 生成6位数字验证码
@@ -22,73 +35,10 @@ func generateVerificationCode() string {
 	return strconv.Itoa(min + rand.Intn(max-min))
 }
 
-// SendSMS 使用腾讯云短信服务发送短信
-// phoneNumbers := []string{"+86138xxxx5678"} // 替换为真实的手机号码，支持多个手机号码同时发送
+// 调用阿里云短信服务发送验证码（此处需替换为真实有效的配置）
 // templateID := "your_template_id"         // 替换为你在腾讯云短信服务配置的短信模板ID
 // templateParam := []string{`{"code":"123456"}`}      // 替换为真实的模板参数，格式要与短信模板定义的参数格式一致
-func SendSMS(phoneNumbers []string, templateID string, templateParam []string) error {
-	// 替换为你自己的腾讯云短信服务配置信息
-	cred := common.NewCredential("your_secret_id", "your_secret_key")
-	cpf := profile.NewClientProfile()
-	cpf.HttpProfile.Endpoint = "sms.tencentcloudapi.com"
-	client, err := sms.NewClient(cred, "ap-guangzhou", cpf)
-	if err != nil {
-		return err
-	}
-
-	request := sms.NewSendSmsRequest()
-	request.SmsSdkAppId = common.StringPtr("your_app_id")
-	request.SignName = common.StringPtr("your_sign_name")
-	request.TemplateId = common.StringPtr(templateID)
-	request.TemplateParamSet = common.StringPtrs(templateParam)
-	request.PhoneNumberSet = common.StringPtrs(phoneNumbers)
-
-	response, err := client.SendSms(request)
-	if err != nil {
-		return err
-	}
-
-	if len(response.Response.SendStatusSet) == 0 {
-		return errors.NewTencentCloudSDKError("Empty response", "", "")
-	}
-
-	for _, status := range response.Response.SendStatusSet {
-		if status.Code == nil || *status.Code != "Ok" {
-			log.Printf("发送短信到 %s 失败，错误码：%s，错误信息：%s\n", *status.PhoneNumber, *status.Code, *status.Message)
-		}
-	}
-
-	return nil
-}
-
-// VerificationCodeInfo 存储验证码相关信息
-type VerificationCodeInfo struct {
-	Code           string
-	ExpirationTime int64
-}
-
-var (
-	verificationCodes = make(map[string]*VerificationCodeInfo)
-	mutex             sync.Mutex
-)
-
-func SendVerificationCodeHandler(c *gin.Context) {
-	var req struct {
-		Phone string `json:"phone"`
-	}
-	if err := c.BindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": "请求参数错误"})
-		return
-	}
-	phone := req.Phone
-	if phone == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": "手机号不能为空"})
-		return
-	}
-	code := generateVerificationCode()
-	expirationTime := time.Now().Unix() + 120 // 验证码有效期120秒（2分钟），可按需调整
-
-	// 调用阿里云短信服务发送验证码（此处需替换为真实有效的配置）
+func AliSendSMS(phoneNumbers string, templateID string, templateParam string) error {
 	// accessKeyId("LTAI5tLUFcjzBxkSrKtrMGTz")
 	// accessKeySecret("rxp45PovC6lq0rl09k1dGmyLFWnIva")
 	// 模板CODE：SMS_254130904
@@ -97,44 +47,100 @@ func SendVerificationCodeHandler(c *gin.Context) {
 	// 	c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "验证码发送失败"})
 	// 	return
 	// }
-
-	mutex.Lock()
-	verificationCodes[phone] = &VerificationCodeInfo{
-		Code:           code,
-		ExpirationTime: expirationTime,
-	}
-	mutex.Unlock()
-
-	c.JSON(http.StatusOK, gin.H{"status": "success", "code": code})
+	fmt.Printf("send code %s for %s", templateParam, phoneNumbers)
+	return nil
 }
 
-func VerificationCodeHandler(c *gin.Context) {
-	var req struct {
-		Phone string `json:"phone"`
-		Code  string `json:"code"`
+func VerifyCode(phoneNumber, inputCode string, expirationMinutes int) bool {
+	verify_mutex.Lock()
+	codeInfo, ok := verificationCodes[phoneNumber]
+	verify_mutex.Unlock()
+
+	if ok {
+		// 计算时间差
+		elapsed := time.Since(codeInfo.SendTime).Minutes()
+		if elapsed <= float64(expirationMinutes) && inputCode == codeInfo.Code {
+			return true
+		}
 	}
-	if err := c.BindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": "请求参数错误"})
-		return
-	}
-	phone := req.Phone
-	inputCode := req.Code
-	if phone == "" || inputCode == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": "手机号和验证码不能为空"})
+	return false
+}
+
+func VerifyCodeHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "只支持POST方法", http.StatusMethodNotAllowed)
 		return
 	}
 
-	mutex.Lock()
-	codeInfo, ok := verificationCodes[phone]
-	mutex.Unlock()
-	if !ok {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": "未发送验证码或验证码已过期"})
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	if codeInfo.Code == inputCode && time.Now().Unix() < codeInfo.ExpirationTime {
-		c.JSON(http.StatusOK, gin.H{"status": "success", "message": "验证码验证成功"})
+	// 关闭请求体，释放资源
+	defer r.Body.Close()
+
+	// 解析JSON数据到User结构体
+	var phone_code VerifyCodeReqData
+	err = json.Unmarshal(body, &phone_code)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	fmt.Printf("phone: %s, code: %s", phone_code.Phone, phone_code.Code)
+
+	responseData := ResponseData{
+		Status:  "success",
+		Message: "verify code succ",
+	}
+
+	if VerifyCode(phone_code.Phone, phone_code.Code, expirationMinutes) {
+		fmt.Fprintf(w, "verifycode pass")
 	} else {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": "验证码错误或已过期"})
+		fmt.Fprintf(w, "verifycode erro or expored")
+		responseData.Status = "failed"
+		responseData.Message = "verify code failed"
 	}
+	PostResponse(w, responseData)
+}
+
+func SendSMSHandler(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, "sms handler parse form failed!", http.StatusBadRequest)
+		return
+	}
+	phoneNumber := r.Form.Get("phone_number")
+	if phoneNumber == "" {
+		http.Error(w, "手机号码不能为空", http.StatusBadRequest)
+		return
+	}
+
+	// 生成6位验证码
+	verificationCode := generateVerificationCode()
+
+	// 根据你的短信模板变量名来设置JSON格式的参数
+	templateParam := fmt.Sprintf("{\"jinxiao project verify code\":\"%s\"}", verificationCode)
+	templateCode := "SMS_254130904"
+
+	responseData := ResponseData{
+		Status:  "success",
+		Message: fmt.Sprintf("%d", expirationMinutes),
+	}
+
+	err = AliSendSMS(phoneNumber, templateCode, templateParam)
+	if err != nil {
+		responseData.Status = "failed"
+		responseData.Message = "message failed to send"
+	} else {
+		verify_mutex.Lock()
+		verificationCodes[phoneNumber] = &VerificationCodeInfo{
+			Code:     verificationCode,
+			SendTime: time.Now(),
+		}
+		verify_mutex.Unlock()
+		fmt.Fprintf(w, "验证码已发送，请注意查收")
+	}
+	PostResponse(w, responseData)
 }

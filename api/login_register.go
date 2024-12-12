@@ -33,42 +33,8 @@ func IsUserExist(user dao.UserInfo, mydao *dao.UserDAO) int {
 	return 0
 }
 
-// SendVerificationCode模拟发送验证码，这里简单返回固定验证码示例，实际需调用短信服务等
-func SendVerificationCode(phone string) string {
-	// 实际场景可生成随机验证码并通过短信接口发送，这里返回固定的 "123456" 作为示例
-	return "123456"
-}
-
-func LoginHandler(w http.ResponseWriter, r *http.Request) {
-	PageHandler(w, "./pages/login.html")
-}
-
-// RegisterHandler处理用户注册的请求
-func RegisterHandler(w http.ResponseWriter, r *http.Request) {
-	PageHandler(w, "./pages/register.html")
-}
-
-func ResetpassHandler(w http.ResponseWriter, r *http.Request) {
-	PageHandler(w, "./pages/reset_pass.html")
-}
-
-func UserCenterHandler(w http.ResponseWriter, r *http.Request) {
-	PageHandler(w, "./pages/user_center.html")
-}
-
-func PersonalHandler(w http.ResponseWriter, r *http.Request) {
-	PageHandler(w, "./pages/personal_desc.html")
-}
-
 func ValidLoginInfo(w http.ResponseWriter, login_info LoginInfo) bool {
-	if login_info.Phone != "" && login_info.Code != "" {
-		// 先验证验证码是否正确（这里只是简单对比示例，实际可能需更复杂逻辑和验证有效期等）
-		sentCode := SendVerificationCode(login_info.Phone)
-		if login_info.Code != sentCode {
-			http.Error(w, "验证码错误", http.StatusUnauthorized)
-			return false
-		}
-	} else if len(login_info.Username) < 4 || len(login_info.Password) < 6 {
+	if len(login_info.Username) < 4 || len(login_info.Password) < 6 {
 		http.Error(w, "username or passphrase not suitable", http.StatusBadRequest)
 		return false
 	}

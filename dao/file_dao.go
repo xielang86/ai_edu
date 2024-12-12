@@ -60,15 +60,15 @@ func QueryAllFileByUsername(dao *UserDAO, username string, result *[]FileInfo) e
 	return nil
 }
 
-func GetFileByMd5(dao *UserDAO, md5 string, info *FileInfo) error {
-	query := fmt.Sprintf("select name, cloud_path, md5, related_lesson_list, username, role, auth_user_list from user_file where md5=\"%s\"", md5)
+func GetFileByMd5(dao *UserDAO, username string, md5 string, info *FileInfo) error {
+	query := fmt.Sprintf("select name, cloud_path, md5, related_lesson_list, username, role, auth_user_list from user_file where md5=\"%s\" && username=\"%s\"", md5, username)
 	row := dao.db.QueryRow(query)
 	err := row.Scan(&info.Name, &info.CloudPath, &info.Md5, &info.RelatedLessonList,
 		&info.Username, &info.Role, &info.AuthUserList)
 	if err == sql.ErrNoRows {
-		fmt.Println("没有找到匹配的行")
+		fmt.Println("no matched record for get file by md5")
 	} else if err != nil {
-		fmt.Println("发生其他错误:", err)
+		fmt.Println("other err:", err)
 	}
 	return err
 }
@@ -76,7 +76,7 @@ func GetFileByMd5(dao *UserDAO, md5 string, info *FileInfo) error {
 func AddFile(dao *UserDAO, username string, role string, name string, file_path string, md5 string, related_lesson string) error {
 	// check by md5
 	var info FileInfo
-	err := GetFileByMd5(dao, md5, &info)
+	err := GetFileByMd5(dao, username, md5, &info)
 	if err != sql.ErrNoRows {
 		fmt.Println("add failed for", name, err)
 		return err

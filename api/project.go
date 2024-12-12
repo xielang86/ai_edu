@@ -9,14 +9,6 @@ import (
 	// "github.com/tencentcloud/cos-go-sdk-v5"
 )
 
-func ProjectHandler(w http.ResponseWriter, r *http.Request) {
-	PageHandler(w, "./pages/project.html")
-}
-
-func ProjectCenterHandler(w http.ResponseWriter, r *http.Request) {
-	PageHandler(w, "./pages/project_center.html")
-}
-
 type ProjectFilter struct {
 	Username string `json:"username"`
 	Role     string `json:"role"`
