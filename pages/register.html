@@ -31,11 +31,12 @@
             <div class="form-row">
                 <label for="phone">手机号：</label>
                 <input type="text" id="phone">
-                <button class="send-code-btn">发送验证码</button>
+                <button id="sms_btn" class="send-code-btn">发送验证码</button>
             </div>
             <div class="form-row">
                 <label for="verify_code">验证码</label>
                 <input type="text" id="verify_code">
+                <div id="errorMessage" style="color: red; display: none;"></div>
             </div>
             <div class="form-row">
                 <label for="password">密码：</label>
@@ -76,7 +77,7 @@
     </div>
 </body>
 
-  <script src="./pages/util.js"></script>
+  <script src="./pages/scripts/util.js"></script>
   <script src="./pages/scripts/register.js"></script>
 
 </html>

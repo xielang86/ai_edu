@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/dysmsapi"
 )
 
 type VerifyCodeReqData struct {
@@ -25,7 +27,7 @@ type VerificationCodeInfo struct {
 var (
 	verificationCodes = make(map[string]*VerificationCodeInfo)
 	verify_mutex      sync.Mutex
-	expirationMinutes = 1
+	expirationMinutes = 2
 )
 
 // generateVerificationCode 生成6位数字验证码
@@ -38,13 +40,42 @@ func generateVerificationCode() string {
 // 调用阿里云短信服务发送验证码（此处需替换为真实有效的配置）
 // templateID := "your_template_id"         // 替换为你在腾讯云短信服务配置的短信模板ID
 // templateParam := []string{`{"code":"123456"}`}      // 替换为真实的模板参数，格式要与短信模板定义的参数格式一致
-func AliSendSMS(phoneNumbers string, templateID string, templateParam string) error {
-	// err := SendSMS({phone}, "", {code})
-	// if err != nil {
-	// 	c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "验证码发送失败"})
-	// 	return
-	// }
-	fmt.Printf("send code %s for %s", templateParam, phoneNumbers)
+func AliSendSms(phoneNumber string, templateCode string, templateParam string) error {
+	accessKeyId := "LTAI5tLUFcjzBxkSrKtrMGTz"
+	accessKeySecret := "rxp45PovC6lq0rl09k1dGmyLFWnIva"
+	// 模板CODE：SMS_254130904
+	// accessKeyId := os.Getenv("ALIYUN_ACCESS_KEY_ID")
+	// 你的阿里云AccessKey Secret
+	// accessKeySecret := os.Getenv("ALIYUN_ACCESS_KEY_SECRET")
+
+	client, err := dysmsapi.NewClientWithAccessKey("cn-hangzhou", accessKeyId, accessKeySecret)
+	fmt.Println("create client")
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	request := dysmsapi.CreateSendSmsRequest()
+	request.Scheme = "https"
+
+	// 设置接收短信的手机号码，多个号码以逗号分隔
+	request.PhoneNumbers = phoneNumber
+	// 设置短信签名名称，在阿里云短信服务控制台配置好的
+	request.SignName = "清大开创"
+	// 设置短信模板编码，在阿里云短信服务控制台配置好的
+	request.TemplateCode = templateCode
+	// 设置短信模板变量的JSON格式字符串，如果模板没有变量则传空字符串
+	request.TemplateParam = templateParam
+	response, err := client.SendSms(request)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	if response.Code != "OK" {
+		return fmt.Errorf("短信发送失败，错误码: %s，错误信息: %s", response.Code, response.Message)
+	}
+
 	return nil
 }
 
@@ -93,9 +124,8 @@ func VerifyCodeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if VerifyCode(phone_code.Phone, phone_code.Code, expirationMinutes) {
-		fmt.Fprintf(w, "verifycode pass")
 	} else {
-		fmt.Fprintf(w, "verifycode erro or expored")
+		fmt.Printf("verifycode erro or expored")
 		responseData.Status = "failed"
 		responseData.Message = "verify code failed"
 	}
@@ -103,13 +133,25 @@ func VerifyCodeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func SendSMSHandler(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, "sms handler parse form failed!", http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	phoneNumber := r.Form.Get("phone_number")
-	if phoneNumber == "" {
+
+	// 关闭请求体，释放资源
+	defer r.Body.Close()
+
+	// 解析JSON数据到User结构体
+	var info VerifyCodeReqData
+	err = json.Unmarshal(body, &info)
+	fmt.Printf("phone: %s", info.Phone)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if info.Phone == "" {
 		http.Error(w, "手机号码不能为空", http.StatusBadRequest)
 		return
 	}
@@ -118,7 +160,7 @@ func SendSMSHandler(w http.ResponseWriter, r *http.Request) {
 	verificationCode := generateVerificationCode()
 
 	// 根据你的短信模板变量名来设置JSON格式的参数
-	templateParam := fmt.Sprintf("{\"jinxiao project verify code\":\"%s\"}", verificationCode)
+	templateParam := fmt.Sprintf("{\"code\":\"%s\"}", verificationCode)
 	templateCode := "SMS_254130904"
 
 	responseData := ResponseData{
@@ -126,18 +168,17 @@ func SendSMSHandler(w http.ResponseWriter, r *http.Request) {
 		Message: fmt.Sprintf("%d", expirationMinutes),
 	}
 
-	err = AliSendSMS(phoneNumber, templateCode, templateParam)
+	err = AliSendSms(info.Phone, templateCode, templateParam)
 	if err != nil {
 		responseData.Status = "failed"
 		responseData.Message = "message failed to send"
 	} else {
 		verify_mutex.Lock()
-		verificationCodes[phoneNumber] = &VerificationCodeInfo{
+		verificationCodes[info.Phone] = &VerificationCodeInfo{
 			Code:     verificationCode,
 			SendTime: time.Now(),
 		}
 		verify_mutex.Unlock()
-		fmt.Fprintf(w, "验证码已发送，请注意查收")
 	}
 	PostResponse(w, responseData)
 }

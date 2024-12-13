@@ -32,6 +32,7 @@ func HandleAllPage(dir_path string) {
 	})
 	// for js,css,image
 	http.Handle("/pages/", http.StripPrefix("/pages/", http.FileServer(http.Dir("pages"))))
+	http.Handle("/local_files/", http.StripPrefix("/local_files/", http.FileServer(http.Dir("local_files"))))
 }
 
 func main() {
