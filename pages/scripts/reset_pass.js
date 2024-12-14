@@ -1,22 +1,16 @@
-// 获取确认按钮元素
-let verificationCode; // 用于存储后端发送过来的验证码（这里只是模拟，实际需后端交互）
-
-document.addEventListener('DOMContentLoaded', function () {
-  const confirmBtn = document.querySelector('.confirm-btn');
-
+function DoReset() {
   // 为确认按钮添加点击事件监听器
   confirmBtn.addEventListener('click', function () {
     // 收集表单数据
-  const inputVerificationCode = document.getElementById('verify_code').value;
-  verificationCode = inputVerificationCode
-  if (inputVerificationCode === verificationCode) {
     const formData = {
         username: document.getElementById('username').value,
         phone: document.getElementById('phone').value,
+        code: document.getElementById("verify_code").value,
         password: document.getElementById('password').value,
         passwordConfirm: document.getElementById('password-confirm').value
     };
     if (formData.password === formData.passwordConfirm) {
+      errorMessageDiv.style.display = 'none';
       try {
         const response = fetch('/reset_pass_post', {
           method: 'POST',
@@ -38,17 +32,25 @@ document.addEventListener('DOMContentLoaded', function () {
         alert('网络异常，请稍后再试');
       }
     } else {
-      const error = document.createElement('p');
-      error.className = 'error';
-      error.textContent = '两次输入的密码不一致，请重新输入';
-      form.appendChild(error);
+      const errorMessageDiv = document.getElementById('errorPassMessage');
+      errorMessageDiv.textContent = '两次密码不一致';
+      errorMessageDiv.style.display = 'block';
     }
-
-  } else {
-    const error = document.createElement('p');
-    error.className = 'error';
-    error.textContent = '验证码错误，请重新输入';
-    form.appendChild(error);
-  }
 });
+
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  const confirmBtn = document.querySelector('.confirm-btn');
+  const phoneInput = document.getElementById("phone")
+  const codeInput = document.getElementById('verify_code')
+  const errorMessageDiv = document.getElementById('errorMessage');
+
+  confirmButton.addEventListener('click', function() {
+    BindVerifyCode(phoneInput, codeInput, errorMessageDiv, DoReset)
+  });
+
+  const smsButton = document.getElementById("sms_btn");
+  BindSMS(smsButton, phoneInput)
+
 });
